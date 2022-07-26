@@ -21,7 +21,7 @@ class Cluster:
 class Clusterer:
     nodes: [Node] = []
     numerical_identifiers: [str] = ["age"]
-    categorical_identifiers: [str] = ["zip"]
+    categorical_identifiers: [str] = ["zip", "gender"]
 
     def __init__(self):
         self.prepareData()
@@ -30,40 +30,42 @@ class Clusterer:
         for categorical_attribute in self.categorical_identifiers:
             with open(f'{categorical_attribute}_generalization_tree.json') as json_file:
                 data = json.load(json_file)
-                # print(self.depth(data))
-                # print(self.gen_dict_extract("482**", data))
-                # print(self.searchCommonAncestor("482**", data))
 
-                # print(list(data.keys()))
-                # print(data)
 
-    def searchCommonAncestor(self, searchItem, data):
+                # print(self.searchCommonAncestor("male", data), categorical_attribute)
+
+
+    def searchCommonAncestor(self, searchItem, date_values):
+        data = date_values.copy()
+        return_value = None
+
         if searchItem in data.keys():
             return searchItem
+
         for key, value in data.items():
             if isinstance(value, dict):
                 if searchItem in data[key].keys():
-                    print("yo")
-                    return key
+                    return_value = key
                 else:
-                    # print(data[key], searchItem)
-                    return self.searchCommonAncestor(searchItem, data[key])
+                    value = self.searchCommonAncestor(searchItem, data[key])
+                    if value is None:
+                        continue
+                    else:
+                        return_value = value
+
             elif isinstance(value, list):
-                if searchItem in value:
-                    print("here")
-                    return key
+                # print(str(searchItem), value, str(searchItem) in value)
+                if str(searchItem) in value:
+                    return_value = key
                 else:
-                    print(value, searchItem)
                     continue
             else:
                 if value == searchItem or key == searchItem:
-                    print("there")
-                    return key
+                    return_value = key
                 else:
-                    print("567")
                     continue
-        print("here1")
-        return None
+
+        return return_value
 
 
     def gen_dict_extract(self, key, var):
@@ -99,17 +101,25 @@ class Clusterer:
             node.id = index
             node.relations = edges[edges["node1"] == index]["node2"].to_list()
             node.degree = len(node.relations)
-            node.value = features.loc[index]
+            node.value = features.loc[index].to_dict()
             self.nodes.append(node)
 
         assert len(self.nodes) == features.index.size
         partitions = [
+            list(filter(lambda x: x.id in {4, 7, 8}, self.nodes)),
             list(filter(lambda x: x.id in {1, 2, 3}, self.nodes)),
-            list(filter(lambda x: x.id in {5, 6, 9}, self.nodes)),
-            list(filter(lambda x: x.id in {4, 7, 8}, self.nodes))
+            list(filter(lambda x: x.id in {5, 6, 9}, self.nodes))
         ]
-        print(partitions)
-        self.getGeneralizedInformationLossForGraph(self.nodes, partitions)
+        partitions2 = [
+            list(filter(lambda x: x.id in {4, 5, 6}, self.nodes)),
+            list(filter(lambda x: x.id in {1, 2, 3}, self.nodes)),
+            list(filter(lambda x: x.id in {7, 8, 9}, self.nodes))
+        ]
+        print("GIL:", self.getGeneralizedInformationLossForGraph(self.nodes, partitions))
+        print("NGIL:", self.getNGIL(self.nodes, partitions))
+
+        print("GIL:", self.getGeneralizedInformationLossForGraph(self.nodes, partitions2))
+        print("NGIL:", self.getNGIL(self.nodes, partitions2))
 
 
     def sortByDegree(self):
@@ -119,12 +129,10 @@ class Clusterer:
         beta = 1
         clusters = []
         # n = set(self.edges_ordered_by_degree["node"].to_list())
-        # print(n)
 
         # for index, row in self.edges_ordered_by_degree.iterrows():
         #     x_seed = row
         # x_star = min(alpha * self.getDistance())
-        # print(index, row["node"], row["degree"])
 
     # def getNodeWithMinimalLoss(self, n, alpha, beta, graph, partition, cluster):
     #     minimum = (0, 0)
@@ -136,7 +144,7 @@ class Clusterer:
     #     return minimum
 
     def getNGIL(self, graph: [Node], partitions: [Node]):
-        return self.getGeneralizedInformationLossForGraph(graph, partitions) / (len(self.categorical_identifiers) + len(self.numerical_identifiers))
+        return self.getGeneralizedInformationLossForGraph(graph, partitions) / (len(self.nodes) * (len(self.categorical_identifiers) + len(self.numerical_identifiers)))
 
     # Definition 5
     def getGeneralizedInformationLossForGraph(self, graph: [Node], partitions: [[Node]]):
@@ -158,24 +166,40 @@ class Clusterer:
 
             total_interval = list(map(lambda nodeItem: nodeItem.value[numerical_attribute], graph))
             size_total = max(total_interval) - min(total_interval)
-
             numerical_sum += size_cluster / size_total
 
         for categorical_attribute in self.categorical_identifiers:
+            test = True
             with open(f'{categorical_attribute}_generalization_tree.json') as json_file:
                 data = json.load(json_file)
-                total_height = self.depth(data)
+                total_height = self.depth(data) - 1
 
                 generalized_keys = []
-                for node in cluster:
-                    print(node.value[categorical_attribute], data)
-                    generalized_key = self.searchCommonAncestor(node.value[categorical_attribute], data)
-                    generalized_keys.append(generalized_key)
+                values = list(set(map(lambda x: x.value[categorical_attribute], cluster)))
+                print(values)
+                if len(values) == 1:
+                    generalized_sum_key = values[0]
+                    print("here")
+                    test = False
+                else:
+                    for node in cluster:
+                        generalized_key = self.searchCommonAncestor(str(node.value[categorical_attribute]), data)
+                        if generalized_key is not None:
+                            generalized_keys.append(generalized_key)
+                        else:
+                            print("is none")
 
-                generalized_sum_key = self.generalizeSum(data, generalized_keys)
+                    print(generalized_keys)
+                    generalized_sum_key = self.generalizeSum(data, generalized_keys)
+                    print(generalized_sum_key)
+
                 sub_generalization_tree = self.getSubtree(data, generalized_sum_key)
+                print(sub_generalization_tree)
                 sub_height = self.depth(sub_generalization_tree)
+                if test is True:
+                    sub_height -= 1
 
+                print(sub_height, "/", total_height)
                 categorical_sum += sub_height / total_height
 
         return clusterSize * (numerical_sum + categorical_sum)
@@ -197,24 +221,26 @@ class Clusterer:
                     else:
                         continue
         else:
-            return data[searchKey]
+            return data
 
     # Get common generalization for all values in list
     def generalizeSum(self, data, values: [str]):
+        if len(set(values)) == 1:
+            return list(set(values))[0]
         ancestors = []
         for item in values:
             ancestor = self.searchCommonAncestor(item, data)
-            ancestors.append(ancestor)
+            if ancestor is not None:
+                ancestors.append(ancestor)
 
         if len(set(ancestors)) == 1:
-            return set(ancestors)
+            return list(set(ancestors))[0]
         else:
             for ancestor in ancestors.copy():
                 ancestors.remove(ancestor)
                 ancestors.append(self.searchCommonAncestor(ancestor, data))
                 if len(set(ancestors)) == 1:
-                    return set(ancestors)
-
+                    return list(set(ancestors))[0]
             return self.generalizeSum(data, ancestors)
 
 

@@ -1,5 +1,5 @@
 from clusterer import Clusterer
 
 if __name__ == '__main__':
-    print("hallo")
+    print("Starting Clusterer...")
     Clusterer()
