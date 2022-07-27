@@ -11,3 +11,6 @@ class Cluster:
     @staticmethod
     def create(graph: Graph, ids: [int]):
         return Cluster(list(filter(lambda node: node.id in ids, graph.nodes)))
+
+    def getIds(self):
+        return list(map(lambda node: node.id, self.nodes))

@@ -14,3 +14,6 @@ class Partition:
             clusters.append(Cluster.create(graph, identifiers))
 
         return Partition(clusters)
+
+    def getIds(self):
+        return list(map(lambda cluster: cluster.getIds(), self.clusters))

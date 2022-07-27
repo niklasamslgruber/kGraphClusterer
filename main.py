@@ -1,6 +1,9 @@
 import pandas as pd
 
+from anonymizationEngine import AnonymizationEngine
 from distanceEngine import DistanceEngine
+from gilEngine import GILEngine
+from models.cluster import Cluster
 from models.graph import Graph
 from models.partition import Partition
 
@@ -14,12 +17,4 @@ if __name__ == '__main__':
     categorical_identifiers: [str] = ["zip", "gender"]
     graph = Graph.create(edges, features, numerical_identifiers, categorical_identifiers)
 
-    partition1 = Partition.create(graph, [[4, 7, 8], [1, 2, 3], [5, 6, 9]])
-    partition2 = Partition.create(graph, [[4, 5, 6], [1, 2, 3], [7, 8, 9]])
-
-    # for (index, partition) in enumerate([partition1, partition2]):
-    #     engine = GILEngine(graph, partition)
-    #     print(f"Partition {index + 1}: \n\tNGIL: {engine.getNGIL()}\n\tGIL: {engine.getGraphGIL()}")
-
-    print(DistanceEngine(graph).getNodeClusterDistance(partition1.clusters[1], graph.nodes[0]))
-
+    print(AnonymizationEngine(graph, 1, 0, 3).anonymize().getIds())
