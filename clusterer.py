@@ -22,18 +22,46 @@ class Clusterer:
     nodes: [Node] = []
     numerical_identifiers: [str] = ["age"]
     categorical_identifiers: [str] = ["zip", "gender"]
+    partitions1: [[Node]] = [[]]
+    partitions2: [[Node]] = [[]]
 
     def __init__(self):
         self.prepareData()
-        self.sortByDegree()
+        self.calculateValues()
 
-        for categorical_attribute in self.categorical_identifiers:
-            with open(f'{categorical_attribute}_generalization_tree.json') as json_file:
-                data = json.load(json_file)
+    def prepareData(self):
+        edges = pd.read_csv("edges.csv", names=["node1", "node2"], header=None)
+        features = pd.read_csv("features.csv", index_col="node")
+        for index, row in features.iterrows():
+            node = Node()
+            node.id = index
+            node.relations = edges[edges["node1"] == index]["node2"].to_list()
+            node.degree = len(node.relations)
+            node.value = features.loc[index].to_dict()
+            self.nodes.append(node)
 
+        assert len(self.nodes) == features.index.size
 
-                # print(self.searchCommonAncestor("male", data), categorical_attribute)
+        self.partitions1 = [
+            list(filter(lambda x: x.id in {4, 7, 8}, self.nodes)),
+            list(filter(lambda x: x.id in {1, 2, 3}, self.nodes)),
+            list(filter(lambda x: x.id in {5, 6, 9}, self.nodes))
+        ]
+        self.partitions2 = [
+            list(filter(lambda x: x.id in {4, 5, 6}, self.nodes)),
+            list(filter(lambda x: x.id in {1, 2, 3}, self.nodes)),
+            list(filter(lambda x: x.id in {7, 8, 9}, self.nodes))
+        ]
 
+    def calculateValues(self):
+        print("Partition Variant 1")
+        print("GIL:", self.getGeneralizedInformationLossForGraph(self.nodes, self.partitions1))
+        print("NGIL:", self.getNGIL(self.nodes, self.partitions1))
+        print("\n---\n")
+
+        print("Partition Variant 2")
+        print("GIL:", self.getGeneralizedInformationLossForGraph(self.nodes, self.partitions2))
+        print("NGIL:", self.getNGIL(self.nodes, self.partitions2))
 
     def searchCommonAncestor(self, searchItem, date_values):
         data = date_values.copy()
@@ -54,7 +82,6 @@ class Clusterer:
                         return_value = value
 
             elif isinstance(value, list):
-                # print(str(searchItem), value, str(searchItem) in value)
                 if str(searchItem) in value:
                     return_value = key
                 else:
@@ -66,7 +93,6 @@ class Clusterer:
                     continue
 
         return return_value
-
 
     def gen_dict_extract(self, key, var):
         if hasattr(var, 'items'):
@@ -93,58 +119,11 @@ class Clusterer:
         return 0
 
 
-    def prepareData(self):
-        edges = pd.read_csv("edges.csv", names=["node1", "node2"], header=None)
-        features = pd.read_csv("features.csv", index_col="node")
-        for index, row in features.iterrows():
-            node = Node()
-            node.id = index
-            node.relations = edges[edges["node1"] == index]["node2"].to_list()
-            node.degree = len(node.relations)
-            node.value = features.loc[index].to_dict()
-            self.nodes.append(node)
 
-        assert len(self.nodes) == features.index.size
-        partitions = [
-            list(filter(lambda x: x.id in {4, 7, 8}, self.nodes)),
-            list(filter(lambda x: x.id in {1, 2, 3}, self.nodes)),
-            list(filter(lambda x: x.id in {5, 6, 9}, self.nodes))
-        ]
-        partitions2 = [
-            list(filter(lambda x: x.id in {4, 5, 6}, self.nodes)),
-            list(filter(lambda x: x.id in {1, 2, 3}, self.nodes)),
-            list(filter(lambda x: x.id in {7, 8, 9}, self.nodes))
-        ]
-        print("GIL:", self.getGeneralizedInformationLossForGraph(self.nodes, partitions))
-        print("NGIL:", self.getNGIL(self.nodes, partitions))
-
-        print("GIL:", self.getGeneralizedInformationLossForGraph(self.nodes, partitions2))
-        print("NGIL:", self.getNGIL(self.nodes, partitions2))
-
-
-    def sortByDegree(self):
-        s = []
-        i = 1
-        alpha = 1
-        beta = 1
-        clusters = []
-        # n = set(self.edges_ordered_by_degree["node"].to_list())
-
-        # for index, row in self.edges_ordered_by_degree.iterrows():
-        #     x_seed = row
-        # x_star = min(alpha * self.getDistance())
-
-    # def getNodeWithMinimalLoss(self, n, alpha, beta, graph, partition, cluster):
-    #     minimum = (0, 0)
-    #     for node in n:
-    #         value = alpha * self.getNGIL(graph, partition) + beta * self.getClusterDistance(node, cluster)
-    #         if value < minimum[0]:
-    #             minimum = (value, node)
-    #
-    #     return minimum
-
+    # Definition 6
     def getNGIL(self, graph: [Node], partitions: [Node]):
-        return self.getGeneralizedInformationLossForGraph(graph, partitions) / (len(self.nodes) * (len(self.categorical_identifiers) + len(self.numerical_identifiers)))
+        return self.getGeneralizedInformationLossForGraph(graph, partitions) / (
+                len(self.nodes) * (len(self.categorical_identifiers) + len(self.numerical_identifiers)))
 
     # Definition 5
     def getGeneralizedInformationLossForGraph(self, graph: [Node], partitions: [[Node]]):
@@ -169,37 +148,29 @@ class Clusterer:
             numerical_sum += size_cluster / size_total
 
         for categorical_attribute in self.categorical_identifiers:
-            test = True
+            should_subtract = True
             with open(f'{categorical_attribute}_generalization_tree.json') as json_file:
                 data = json.load(json_file)
                 total_height = self.depth(data) - 1
 
                 generalized_keys = []
                 values = list(set(map(lambda x: x.value[categorical_attribute], cluster)))
-                print(values)
                 if len(values) == 1:
                     generalized_sum_key = values[0]
-                    print("here")
-                    test = False
+                    should_subtract = False
                 else:
                     for node in cluster:
                         generalized_key = self.searchCommonAncestor(str(node.value[categorical_attribute]), data)
                         if generalized_key is not None:
                             generalized_keys.append(generalized_key)
-                        else:
-                            print("is none")
 
-                    print(generalized_keys)
                     generalized_sum_key = self.generalizeSum(data, generalized_keys)
-                    print(generalized_sum_key)
 
                 sub_generalization_tree = self.getSubtree(data, generalized_sum_key)
-                print(sub_generalization_tree)
                 sub_height = self.depth(sub_generalization_tree)
-                if test is True:
+                if should_subtract is True:
                     sub_height -= 1
 
-                print(sub_height, "/", total_height)
                 categorical_sum += sub_height / total_height
 
         return clusterSize * (numerical_sum + categorical_sum)
@@ -242,10 +213,3 @@ class Clusterer:
                 if len(set(ancestors)) == 1:
                     return list(set(ancestors))[0]
             return self.generalizeSum(data, ancestors)
-
-
-    # def getClusterDistance(self, node, cluster):
-    #     return 4
-    #
-    # def getNodeDistance(self, x, y):
-    #     return 2
