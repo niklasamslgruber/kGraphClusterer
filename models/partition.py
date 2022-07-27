@@ -1,4 +1,4 @@
-from cluster import Cluster
+from models.cluster import Cluster
 
 
 class Partition:

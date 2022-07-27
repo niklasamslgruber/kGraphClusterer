@@ -1,5 +1,5 @@
 import pandas as pd
-from node import Node
+from models.node import Node
 
 
 class Graph:

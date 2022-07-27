@@ -1,7 +1,8 @@
 import pandas as pd
-from gilengine import GILEngine
-from graph import Graph
-from partition import Partition
+
+from distanceEngine import DistanceEngine
+from models.graph import Graph
+from models.partition import Partition
 
 if __name__ == '__main__':
     print("Starting Clusterer...")
@@ -16,6 +17,9 @@ if __name__ == '__main__':
     partition1 = Partition.create(graph, [[4, 7, 8], [1, 2, 3], [5, 6, 9]])
     partition2 = Partition.create(graph, [[4, 5, 6], [1, 2, 3], [7, 8, 9]])
 
-    for (index, partition) in enumerate([partition1, partition2]):
-        engine = GILEngine(graph, partition)
-        print(f"Partition {index + 1}: \n\tNGIL: {engine.getNGIL()}\n\tGIL: {engine.getGraphGIL()}")
+    # for (index, partition) in enumerate([partition1, partition2]):
+    #     engine = GILEngine(graph, partition)
+    #     print(f"Partition {index + 1}: \n\tNGIL: {engine.getNGIL()}\n\tGIL: {engine.getGraphGIL()}")
+
+    print(DistanceEngine(graph).getNodeClusterDistance(partition1.clusters[1], graph.nodes[0]))
+

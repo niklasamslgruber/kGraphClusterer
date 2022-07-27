@@ -1,7 +1,7 @@
 import json
-from cluster import Cluster
-from graph import Graph
-from partition import Partition
+from models.cluster import Cluster
+from models.graph import Graph
+from models.partition import Partition
 
 
 class GILEngine:

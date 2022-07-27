@@ -1,5 +1,5 @@
-from node import Node
-from graph import Graph
+from models.node import Node
+from models.graph import Graph
 
 
 class Cluster:
