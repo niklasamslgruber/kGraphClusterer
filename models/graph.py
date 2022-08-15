@@ -25,7 +25,6 @@ class Graph:
         graph.categorical_identifiers = categoricalAttributes
 
         assert len(graph.nodes) == features.index.size, f"Number of features ({features.index.size}) does not match number of nodes ({len(graph.nodes)}"
-
         return graph
 
     def getIds(self):

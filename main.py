@@ -1,11 +1,8 @@
 import pandas as pd
-
 from anonymizationEngine import AnonymizationEngine
-from distanceEngine import DistanceEngine
-from gilEngine import GILEngine
-from models.cluster import Cluster
+from informationLossEngine import InformationLossEngine
 from models.graph import Graph
-from models.partition import Partition
+import copy
 
 if __name__ == '__main__':
     print("Starting Clusterer...")
@@ -17,4 +14,9 @@ if __name__ == '__main__':
     categorical_identifiers: [str] = ["zip", "gender"]
     graph = Graph.create(edges, features, numerical_identifiers, categorical_identifiers)
 
-    print(AnonymizationEngine(graph, 1, 0, 3).anonymize().getIds())
+    partition = AnonymizationEngine(copy.copy(graph), 1, 0, 3).anonymize()
+    nsil = InformationLossEngine().getNSIL(partition, graph)
+
+    partition2 = AnonymizationEngine(copy.copy(graph), 0, 1, 3).anonymize()
+    nsil2 = InformationLossEngine().getNSIL(partition2, graph)
+    print(nsil2)
