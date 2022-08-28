@@ -40,13 +40,13 @@ class AnonymizationEngine:
             self.graph_nodes.remove(x_seed)
 
             while len(S[i].nodes) < self.k and len(self.graph_nodes) != 0:
-                # X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
+                X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
+                index = i
 
-                print("----")
-                X_star, _ = InformationLossEngine().getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S), self.k)
+                # X_star, metric, index = InformationLossEngine().getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S), self.k)
+                # X_star, metric = InformationLossEngine().getDiscernibilityMetricForCurrentClusterOnly(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]), self.k)
 
-                # print(X_star.id, node.id)
-                S[i].nodes.append(X_star)
+                S[index].nodes.append(X_star)
                 self.graph_nodes.remove(X_star)
 
             if len(S[i].nodes) < self.k:
@@ -57,25 +57,6 @@ class AnonymizationEngine:
                 i += 1
 
         return Partition(final_clusters)
-
-    def _disperseCluster(self):
-        print("TODO")
-        # S = copy.deepcopy(S_original)
-        # for node in graph_nodes.copy():
-        #     S = copy.deepcopy(S_original)
-        #     print(f"Analyze node {node.id}")
-        #     untouchedNodes = list(filter(lambda x: x.id != node.id, graph_nodes))
-        #     untouchedCluster = Cluster(untouchedNodes)
-        #     print(f"Untouched Nodes {list(map(lambda y: y.id, untouchedCluster.nodes))}")
-        #
-        #     for index in S:
-        #         S = copy.deepcopy(S_original)
-        #         print(f"Attach to cluster {index}")
-        #         S[index].nodes.append(node)
-        #         clusters = list(map(lambda key: Cluster(S[key].nodes), S))
-        #         for x in clusters:
-        #             print(f"Cluster {x.getIds()}")
-
 
     def _getArgminNode(self, alpha, beta, cluster):
         min_loss = (99999, None)

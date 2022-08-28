@@ -45,6 +45,8 @@ class GraphEvaluationEngine:
         values: [([int], [int], float)] = []
         for (index, cluster) in enumerate(partition.clusters):
             for item in range(index + 1, len(cluster.nodes)):
+                if item > len(partition.clusters) - 1:
+                    continue
                 cluster2 = partition.clusters[item]
                 values.append((cluster.getIds(), cluster2.getIds(), self._getInterLossForCluster(cluster, cluster2)))
 

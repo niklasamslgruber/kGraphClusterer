@@ -1,49 +1,60 @@
 import math
-
 from models.cluster import Cluster
 from models.graph import Graph
 from models.node import Node
 import copy
 
-class InformationLossEngine:
 
+class InformationLossEngine:
     # http://www.tdp.cat/issues11/tdp.a169a14.pdf
-    def getDiscernibilityMetric(self, graph: Graph, graph_nodes: [Node], S_original: {int: Cluster}, k: int) -> (Node, int):
+
+    @staticmethod
+    def getDiscernibilityMetric(graph: Graph, graph_nodes: [Node], S_original: {int: Cluster}, k: int) -> (Node, int):
         S = copy.deepcopy(S_original)
-        optimal_case: (Node, int) = (None, math.inf)
+        optimal_case: (Node, int, int) = (None, math.inf, math.inf)
         for node in graph_nodes.copy():
             S = copy.deepcopy(S_original)
-            # print(f"Analyze node {node.id}")
-            untouchedNodes = list(filter(lambda x: x.id != node.id, graph_nodes))
 
             for index in S:
+                if len(S[index].nodes) >= k:
+                    continue
                 S = copy.deepcopy(S_original)
-                # print(f"\nAttach to cluster {index}")
                 S[index].nodes.append(node)
                 clusters = list(map(lambda key: Cluster(S[key].nodes), S))
                 all_cluster = clusters
 
                 disc_metric = 0
                 for cluster in all_cluster:
-                    # print(f"Cluster Nodes {list(map(lambda y: y.id, cluster.nodes))}")
                     if len(cluster.nodes) < k:
                         disc_metric += len(graph.nodes) * len(cluster.nodes)
                     else:
                         disc_metric += math.pow(len(cluster.nodes), 2)
-                # print(f"Metric {disc_metric}")
+
                 if disc_metric < optimal_case[1]:
-                    optimal_case = (node, disc_metric)
+                    optimal_case = (node, disc_metric, index)
 
         return optimal_case
 
+    # Result is equal to other DiscernibilityMetric if < is used above for overriding optimal_case, if <= is used the results vary
+    @staticmethod
+    def getDiscernibilityMetricForCurrentClusterOnly(graph: Graph, graph_nodes: [Node], S_original: Cluster, k: int) -> (Node, int):
+        optimal_case: (Node, int) = (None, math.inf)
+        for node in graph_nodes.copy():
+            S = copy.deepcopy(S_original)
+            S.nodes.append(node)
+            cluster = Cluster(S.nodes)
 
-                # for x in clusters:
-                #     print(f"Cluster {x.getIds()}")
+            disc_metric = 0
 
-        # S = S_original
+            if len(cluster.nodes) < k:
+                disc_metric += len(graph.nodes) * len(cluster.nodes)
+            else:
+                disc_metric += math.pow(len(cluster.nodes), 2)
 
+            if disc_metric < optimal_case[1]:
+                optimal_case = (node, disc_metric)
 
-
+        return optimal_case
 
     # def getPrecision:
     #     return 2
