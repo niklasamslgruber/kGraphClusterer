@@ -1,73 +1,64 @@
-from models.cluster import Cluster
-from models.partition import Partition
 import math
 
+from models.cluster import Cluster
+from models.graph import Graph
+from models.node import Node
+import copy
 
 class InformationLossEngine:
 
-    def getSIL(self, partition):
-        total_inter_loss = 0
-        total_intra_loss = 0
+    # http://www.tdp.cat/issues11/tdp.a169a14.pdf
+    def getDiscernibilityMetric(self, graph: Graph, graph_nodes: [Node], S_original: {int: Cluster}, k: int) -> (Node, int):
+        S = copy.deepcopy(S_original)
+        optimal_case: (Node, int) = (None, math.inf)
+        for node in graph_nodes.copy():
+            S = copy.deepcopy(S_original)
+            # print(f"Analyze node {node.id}")
+            untouchedNodes = list(filter(lambda x: x.id != node.id, graph_nodes))
 
-        for interLoss in self.getInterLossesForPartition(partition):
-            total_inter_loss += interLoss[2]
+            for index in S:
+                S = copy.deepcopy(S_original)
+                # print(f"\nAttach to cluster {index}")
+                S[index].nodes.append(node)
+                clusters = list(map(lambda key: Cluster(S[key].nodes), S))
+                all_cluster = clusters
 
-        for intraLoss in self.getIntraLossesForPartition(partition):
-            total_intra_loss += intraLoss[1]
+                disc_metric = 0
+                for cluster in all_cluster:
+                    # print(f"Cluster Nodes {list(map(lambda y: y.id, cluster.nodes))}")
+                    if len(cluster.nodes) < k:
+                        disc_metric += len(graph.nodes) * len(cluster.nodes)
+                    else:
+                        disc_metric += math.pow(len(cluster.nodes), 2)
+                # print(f"Metric {disc_metric}")
+                if disc_metric < optimal_case[1]:
+                    optimal_case = (node, disc_metric)
 
-        return total_inter_loss + total_intra_loss
+        return optimal_case
 
-    def getNSIL(self, partition, graph):
-        total_nodes = len(graph.nodes)
 
-        return self.getSIL(partition) / (total_nodes * (total_nodes - 1) / 4)
+                # for x in clusters:
+                #     print(f"Cluster {x.getIds()}")
 
-    def getIntraLossesForPartition(self, partition: Partition):
-        values: [([int], float)] = []
-        for cluster in partition.clusters:
-            values.append((cluster.getIds(), self.getIntraLossForCluster(cluster)))
+        # S = S_original
 
-        return values
 
-    def getIntraLossForCluster(self, cluster: Cluster):
-        numberOfNodes = len(cluster.nodes)
-        numberOfEdges = self.getNumberOfEdgesInCluster(cluster)
 
-        return 2 * numberOfEdges * (1 - (numberOfEdges / self.getNOfM(numberOfNodes, 2)))
 
-    def getInterLossesForPartition(self, partition: Partition):
-        values: [([int], [int], float)] = []
-        for (index, cluster) in enumerate(partition.clusters):
-            for item in range(index + 1, len(cluster.nodes)):
-                cluster2 = partition.clusters[item]
-                values.append((cluster.getIds(), cluster2.getIds(), self.getInterLossForCluster(cluster, cluster2)))
+    # def getPrecision:
+    #     return 2
+    #
+    # def getNormalizedAverageEquivalenceClassSizeMetric:
+    #     return 2.5
+    #
+    # def getClassificationMetric:
+    #     return 3
+    #
+    # def getNormalizedCertaintyPenalty:
+    #     return 4
+    #
+    #
+    # def getEntropy:
+    #     return 5
 
-        return values
-
-    def getInterLossForCluster(self, cluster: Cluster, cluster2: Cluster):
-        totalNumberOfEdges = 0
-        ids = cluster2.getIds()
-
-        for node in cluster.nodes:
-            for item in node.relations:
-                if item in ids:
-                    totalNumberOfEdges += 1
-
-        return 2 * totalNumberOfEdges * (1 - (totalNumberOfEdges / (len(cluster.nodes) * len(cluster2.nodes))))
-
-    # - HELPER
-
-    # n = Top, m = Bottom
-    def getNOfM(self, n: int, m: int):
-        return math.factorial(n) / (math.factorial(n - m) * math.factorial(m))
-
-    def getNumberOfEdgesInCluster(self, cluster: Cluster):
-        numberOfEdges = 0
-        ids = cluster.getIds()
-        for node in cluster.nodes:
-            for item in node.relations:
-                if item in ids:
-                    numberOfEdges += 1
-
-        numberOfEdges = numberOfEdges / 2
-        return numberOfEdges
+    # def
