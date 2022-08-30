@@ -1,4 +1,6 @@
 import json
+
+from dataHandler.datasets import Datasets
 from models.cluster import Cluster
 from models.graph import Graph
 from models.partition import Partition
@@ -53,7 +55,7 @@ class GILEngine:
 
         # Categorical Identifiers
         for categorical_attribute in self.graph.categorical_identifiers:
-            with open(f'data/generalizationTrees/{categorical_attribute}_generalization_tree.json') as json_file:
+            with open(Datasets.SAMPLE.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
                 total_height = self._getTreeDepth(data) - 1
 
@@ -86,7 +88,7 @@ class GILEngine:
         # Categorical Identifiers
         for categorical_attribute in self.graph.categorical_identifiers:
             should_subtract = True
-            with open(f'data/generalizationTrees/{categorical_attribute}_generalization_tree.json') as json_file:
+            with open(Datasets.SAMPLE.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
 
                 generalized_keys = []

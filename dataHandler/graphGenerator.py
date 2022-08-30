@@ -1,20 +1,22 @@
 import pandas as pd
-from dataProcessor import DataProcessor
+from dataHandler.dataProcessor import DataProcessor
 import random
 from os.path import exists
+
+from dataHandler.datasets import Datasets
 
 
 class GraphGenerator:
 
     @staticmethod
-    def generateRandomEdges(dataset: DataProcessor.Dataset, num: int, limit: int = -1, force: bool = False):
+    def generateRandomEdges(dataset: Datasets, num: int, limit: int = -1, force: bool = False):
         edge_file = dataset.getEdgePath()
 
         if exists(edge_file) and not force:
             print("Edge File already exists and will not be generated again. Use the `force` paramter to re-generate edges again.")
             return
 
-        frame = DataProcessor.loadData(dataset)
+        frame = DataProcessor.loadFeatures(dataset)
 
         if limit != -1 and limit < len(frame):
             frame = frame.head(limit)

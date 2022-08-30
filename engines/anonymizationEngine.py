@@ -1,8 +1,5 @@
-import copy
-
-from distanceEngine import DistanceEngine
-from gilEngine import GILEngine
-from informationLossEngine import InformationLossEngine
+from engines.distanceEngine import DistanceEngine
+from engines.gilEngine import GILEngine
 from models.cluster import Cluster
 from models.graph import Graph
 from models.node import Node

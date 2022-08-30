@@ -1,52 +1,48 @@
 from typing import Optional
 import pandas as pd
 from os.path import exists
-from os import mkdir
-from enum import Enum, unique
+from dataHandler.datasets import Datasets
 
 
 class DataProcessor:
-    @unique
-    class Dataset(Enum):
-        ADULTS = "data/adults/adults.csv"
-        BANK_CLIENTS = "data/banks/banks.csv"
-
-        def getDirectory(self):
-            return "/".join(self.value.split("/")[:-1])
-
-        def createDirectoryIfNotExists(self):
-            if not exists(self.getDirectory()):
-                mkdir(self.getDirectory())
-
-        def getEdgePath(self):
-            return f"{self.getDirectory()}/edges.csv"
 
     @staticmethod
-    def loadData(dataset: Dataset) -> Optional[pd.DataFrame]:
+    def loadFeatures(dataset: Datasets) -> Optional[pd.DataFrame]:
         if not exists(dataset.value):
             print(f"Data for dataset {dataset.name} does not exist. Starting to process it now...")
             match dataset:
-                case DataProcessor.Dataset.BANK_CLIENTS:
+                case Datasets.BANK_CLIENTS:
                     DataProcessor.__processBankData()
-                case DataProcessor.Dataset.ADULTS:
+                case Datasets.ADULTS:
                     DataProcessor.__processAdultData()
                 case _:
                     return None
 
-        frame = pd.read_csv(dataset.value)
-        DataProcessor.checkEdgeFile(dataset)
+        frame = pd.read_csv(dataset.value, index_col="id")
+        DataProcessor.__checkEdgeFile(dataset)
         return frame
 
     @staticmethod
-    def checkEdgeFile(dataset: Dataset):
+    def loadEdges(dataset: Datasets):
+        if DataProcessor.__checkEdgeFile(dataset):
+            frame = pd.read_csv(dataset.getEdgePath(), header=None)
+            frame.columns = ["node1", "node2"]
+            return frame
+
+    # HELPER
+
+    @staticmethod
+    def __checkEdgeFile(dataset: Datasets):
         if not exists(dataset.getEdgePath()):
             print(f"No edge file (edges.csv) found for {dataset.name}")
+            return False
+        return True
 
     # Source: https://archive.ics.uci.edu/ml/datasets/Bank+Marketing
     @staticmethod
     def __processBankData() -> pd.DataFrame:
-        dataset = DataProcessor.Dataset.BANK_CLIENTS
-        frame = pd.read_csv("data/raw/bank/bank-full.csv", sep=";")
+        dataset = Datasets.BANK_CLIENTS
+        frame = pd.read_csv("../data/raw/bank/bank-full.csv", sep=";")
 
         for column in ["contact", "day", "month", "duration", "campaign", "pdays", "previous", "poutcome"]:
             frame = frame.drop(column, axis=1)
@@ -59,8 +55,8 @@ class DataProcessor:
     # Source: https://archive.ics.uci.edu/ml/datasets/Adult
     @staticmethod
     def __processAdultData() -> pd.DataFrame:
-        dataset = DataProcessor.Dataset.ADULTS
-        frame = pd.read_csv("data/raw/adult/adult.data", header=None)
+        dataset = Datasets.ADULTS
+        frame = pd.read_csv("../data/raw/adult/adult.data", header=None)
         frame.columns = ["age", "workclass", "finalWeight", "education", "education-num", "martial-status",
                          "occupation", "relationship", "race", "sex", "captial-gain", "capital-loss", "hours-per-week",
                          "native-country", "income"]
