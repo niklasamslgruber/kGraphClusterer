@@ -1,13 +1,14 @@
 from os.path import exists
 from os import mkdir
 from enum import Enum, unique
+from constants import ROOT_DIR
 
 
 @unique
 class Datasets(Enum):
-    ADULTS = "data/adults/adults.csv"
-    BANK_CLIENTS = "data/banks/banks.csv"
-    SAMPLE = "data/sample/sample.csv"
+    ADULTS = f"{ROOT_DIR}/data/adults/adults.csv"
+    BANK_CLIENTS = f"{ROOT_DIR}/data/banks/banks.csv"
+    SAMPLE = f"{ROOT_DIR}/data/sample/sample.csv"
 
     def getDirectory(self):
         return "/".join(self.value.split("/")[:-1])
@@ -21,3 +22,25 @@ class Datasets(Enum):
 
     def getGeneralizationTree(self, attribute: str):
         return f"{self.getDirectory()}/trees/{attribute}_generalization_tree.json"
+
+    def getCategoricalIdentifiers(self):
+        match self:
+            case Datasets.SAMPLE:
+                return ["zip", "gender"]
+            case Datasets.BANK_CLIENTS:
+                return []
+            case Datasets.ADULTS:
+                return ["workclass", "marital-status", "race", "sex", "native-country"]
+            case _:
+                return []
+
+    def getNumericalIdentifiers(self):
+        match self:
+            case Datasets.SAMPLE:
+                return ["age"]
+            case Datasets.BANK_CLIENTS:
+                return []
+            case Datasets.ADULTS:
+                return ["age"]
+            case _:
+                return []

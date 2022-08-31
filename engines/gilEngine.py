@@ -9,10 +9,12 @@ from models.partition import Partition
 class GILEngine:
     graph: Graph
     partition: Partition
+    dataset: Datasets
 
-    def __init__(self, graph: Graph, partition: Partition):
+    def __init__(self, graph: Graph, partition: Partition, dataset: Datasets):
         self.graph = graph
         self.partition = partition
+        self.dataset = dataset
 
     # - CALCULATIONS
 
@@ -55,7 +57,7 @@ class GILEngine:
 
         # Categorical Identifiers
         for categorical_attribute in self.graph.categorical_identifiers:
-            with open(Datasets.SAMPLE.getGeneralizationTree(categorical_attribute)) as json_file:
+            with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
                 total_height = self._getTreeDepth(data) - 1
 
@@ -88,7 +90,7 @@ class GILEngine:
         # Categorical Identifiers
         for categorical_attribute in self.graph.categorical_identifiers:
             should_subtract = True
-            with open(Datasets.SAMPLE.getGeneralizationTree(categorical_attribute)) as json_file:
+            with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
 
                 generalized_keys = []

@@ -1,28 +1,36 @@
 from models.cluster import Cluster
+from models.graph import Graph
 from models.partition import Partition
 import math
 
 
 class GraphEvaluationEngine:
+    partition: Partition
+    graph: Graph
+
+    def __init__(self, partition: Partition, graph: Graph):
+        self.partition = partition
+        self.graph = graph
+
 
     # Metrics
 
-    def getSIL(self, partition):
+    def getSIL(self):
         total_inter_loss = 0
         total_intra_loss = 0
 
-        for interLoss in self._getInterLossesForPartition(partition):
+        for interLoss in self._getInterLossesForPartition(self.partition):
             total_inter_loss += interLoss[2]
 
-        for intraLoss in self._getIntraLossesForPartition(partition):
+        for intraLoss in self._getIntraLossesForPartition(self.partition):
             total_intra_loss += intraLoss[1]
 
         return total_inter_loss + total_intra_loss
 
-    def getNSIL(self, partition, graph):
-        total_nodes = len(graph.nodes)
+    def getNSIL(self):
+        total_nodes = len(self.graph.nodes)
 
-        return self.getSIL(partition) / (total_nodes * (total_nodes - 1) / 4)
+        return self.getSIL() / (total_nodes * (total_nodes - 1) / 4)
 
     # Intra-cluster structural information loss
 

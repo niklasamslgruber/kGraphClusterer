@@ -1,0 +1,69 @@
+{
+  "Country": {
+    "America": {
+      "North_A": [
+        "United-States",
+        "Canada",
+        "Outlying-US(Guam-USVI-etc)"
+      ],
+      "South_A": [
+        "Columbia",
+        "Ecuador",
+        "Peru"
+      ],
+      "Central_A": [
+        "Cuba",
+        "Jamaica",
+        "Mexico",
+        "Puerto-Rico",
+        "Honduras",
+        "Haiti",
+        "Dominican-Republic",
+        "El-Salvador",
+        "Guatemala",
+        "Trinadad&Tobago",
+        "Nicaragua"
+      ]
+    },
+    "Europe": {
+      "West_E": [
+        "England",
+        "Germany",
+        "Italy",
+        "Portugal",
+        "France",
+        "Scotland",
+        "Ireland",
+        "Holand-Netherlands"
+      ],
+      "East_E": [
+        "Poland",
+        "Yugoslavia",
+        "Greece",
+        "Hungary"
+      ]
+    },
+    "Asia": {
+      "West_A": [],
+      "East_A": [
+        "India",
+        "Philippines",
+        "Cambodia",
+        "Thailand",
+        "Laos",
+        "Taiwan",
+        "China",
+        "Japan",
+        "Vietnam",
+        "Hong-Kong",
+        "Iran"
+      ]
+    },
+    "Africa": {
+      "North_Af": [],
+      "South_Af": [
+        "South-Africa"
+      ]
+    }
+  }
+}

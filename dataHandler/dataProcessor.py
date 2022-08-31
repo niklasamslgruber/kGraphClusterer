@@ -23,6 +23,17 @@ class DataProcessor:
         return frame
 
     @staticmethod
+    def getUniqueValues(dataset: Datasets, categorical_identifiers: [str]):
+        frame = DataProcessor.loadFeatures(dataset)
+        # print(frame.columns)
+        # print(frame.head())
+        categorical_identifiers = ["workclass", "marital-status", "race", "sex", "native-country"]
+        numercial_identifiers = ["age"]
+
+        for identifier in categorical_identifiers:
+            print(identifier, frame[identifier].unique())
+
+    @staticmethod
     def loadEdges(dataset: Datasets):
         if DataProcessor.__checkEdgeFile(dataset):
             frame = pd.read_csv(dataset.getEdgePath(), header=None)
@@ -57,8 +68,8 @@ class DataProcessor:
     def __processAdultData() -> pd.DataFrame:
         dataset = Datasets.ADULTS
         frame = pd.read_csv("../data/raw/adult/adult.data", header=None)
-        frame.columns = ["age", "workclass", "finalWeight", "education", "education-num", "martial-status",
-                         "occupation", "relationship", "race", "sex", "captial-gain", "capital-loss", "hours-per-week",
+        frame.columns = ["age", "workclass", "finalWeight", "education", "education-num", "marital-status",
+                         "occupation", "relationship", "race", "sex", "capital-gain", "capital-loss", "hours-per-week",
                          "native-country", "income"]
 
         dataset.createDirectoryIfNotExists()

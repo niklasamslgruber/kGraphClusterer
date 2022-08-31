@@ -1,37 +1,46 @@
 import pandas as pd
+
+from dataHandler.graphGenerator import GraphGenerator
 from engines.anonymizationEngine import AnonymizationEngine
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets
 from engines.gilEngine import GILEngine
 from engines.graphEvaluationEngine import GraphEvaluationEngine
-from dataHandler.graphGenerator import GraphGenerator
 from models.graph import Graph
 import copy
+
+
+def start(dataset: Datasets, alpha: int, beta: int, k: int, limit: int = -1):
+    edges: pd.DataFrame = DataProcessor.loadEdges(dataset)
+    features: pd.DataFrame = DataProcessor.loadFeatures(dataset)
+
+    if limit != -1:
+        features = features.head(limit)
+
+    graph = Graph.create(edges, features, dataset)
+
+    partition = AnonymizationEngine(copy.copy(graph), alpha, beta, k, dataset).anonymize()
+    print("\n-----")
+    print(f"Generated Clusters for dataset {dataset.name} (k = {k}, alpha = {alpha}, beta = {beta}):")
+    for (index, cluster) in enumerate(partition.clusters):
+        print(f"\tCluster {index + 1}:", cluster.getIds())
+
+    print("\nStatistics:")
+    nsil = GraphEvaluationEngine(partition, graph).getNSIL()
+    ngil = GILEngine(graph, partition, dataset).getNGIL()
+    print("\tNSIL:", nsil)
+    print("\tNGIL:", ngil)
+
 
 if __name__ == '__main__':
     print("Starting Clusterer...\n")
 
-    edges: pd.DataFrame = DataProcessor.loadEdges(Datasets.SAMPLE)
-    features: pd.DataFrame = DataProcessor.loadFeatures(Datasets.SAMPLE)
+    limit = 100
 
-    numerical_identifiers: [str] = ["age"]
-    categorical_identifiers: [str] = ["zip", "gender"]
-    graph = Graph.create(edges, features, numerical_identifiers, categorical_identifiers)
+    start(Datasets.ADULTS, 1, 0, 3, limit=limit)
+    # start(Datasets.ADULTS, 0, 1, 3, limit=limit)
 
-    partition = AnonymizationEngine(copy.copy(graph), 1, 0, 3).anonymize()
-    print("Clusters:")
-    for cluster in partition.clusters:
-        print("\t", cluster.getIds())
+    # DataProcessor.getUniqueValues(Datasets.ADULTS, [])
 
-    nsil = GraphEvaluationEngine().getNSIL(partition, graph)
-    ngil = GILEngine(graph, partition).getNGIL()
-    print("NSIL:", nsil)
-    print("NGIL:", ngil)
-
-
-    # DataProcessor.loadData(DataProcessor.Dataset.BANK_CLIENTS)
-    # DataProcessor.loadData(DataProcessor.Dataset.ADULTS)
-
-    GraphGenerator.generateRandomEdges(Datasets.ADULTS, num=100)
-    GraphGenerator.generateRandomEdges(Datasets.BANK_CLIENTS, num=100, limit=1000)
-
+    # GraphGenerator.generateRandomEdges(Datasets.ADULTS, num=500, limit=limit, force=True)
+    # GraphGenerator.generateRandomEdges(Datasets.BANK_CLIENTS, num=500, limit=limit, force=True)

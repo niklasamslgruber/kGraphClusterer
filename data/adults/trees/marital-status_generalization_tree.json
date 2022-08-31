@@ -1,0 +1,15 @@
+{
+  "Occupation": {
+    "Married": [
+      "Married-civ-spouse",
+      "Married-spouse-absent",
+      "Separated",
+      "Married-AF-spouse"
+    ],
+    "Not_Married": [
+      "Never-married",
+      "Divorced",
+      "Widowed"
+    ]
+  }
+}
