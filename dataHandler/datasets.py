@@ -26,6 +26,12 @@ class Datasets(Enum):
     def getResultsPath(self):
         return f"{self.getDirectory()}/results.csv"
 
+    def getImagePath(self):
+        path = f"{self.getDirectory()}/images"
+        if not exists(path):
+            mkdir(path)
+        return path
+
     def getCategoricalIdentifiers(self):
         match self:
             case Datasets.SAMPLE:
