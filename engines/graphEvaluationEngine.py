@@ -12,7 +12,6 @@ class GraphEvaluationEngine:
         self.partition = partition
         self.graph = graph
 
-
     # Metrics
 
     def getSIL(self):
@@ -29,8 +28,8 @@ class GraphEvaluationEngine:
 
     def getNSIL(self):
         total_nodes = len(self.graph.nodes)
-
-        return self.getSIL() / (total_nodes * (total_nodes - 1) / 4)
+        nsil = self.getSIL() / (total_nodes * (total_nodes - 1) / 4)
+        return 0 if nsil < 0 else nsil
 
     # Intra-cluster structural information loss
 
@@ -80,6 +79,7 @@ class GraphEvaluationEngine:
     def _getNumberOfEdgesInCluster(self, cluster: Cluster):
         numberOfEdges = 0
         ids = cluster.getIds()
+
         for node in cluster.nodes:
             for item in node.relations:
                 if item in ids:

@@ -20,9 +20,11 @@ class GILEngine:
 
     # Normalized Generalization Information Loss for whole Graph (Definition 6)
     def getNGIL(self):
-        return self.getGraphGIL() / (
+        ngil = self.getGraphGIL() / (
                 len(self.graph.nodes) * (
                     len(self.graph.categorical_identifiers) + len(self.graph.numerical_identifiers)))
+        return 0 if ngil < 0 else ngil
+
 
     # Total Generalization Information Loss for whole Graph (Definition 5)
     def getGraphGIL(self):

@@ -73,7 +73,5 @@ class NGILTests(unittest.TestCase):
             self.assertTrue(cluster in real_result)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()

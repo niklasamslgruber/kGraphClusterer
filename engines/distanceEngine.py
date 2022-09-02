@@ -28,4 +28,6 @@ class DistanceEngine:
             if new_index != node1.id and new_index != node2.id and value != b2[index]:
                 cardinality += 1
 
+        if len(self.graph.nodes) == 2:
+            return 0
         return cardinality / (len(self.graph.nodes) - 2)

@@ -23,12 +23,15 @@ class Datasets(Enum):
     def getGeneralizationTree(self, attribute: str):
         return f"{self.getDirectory()}/trees/{attribute}_generalization_tree.json"
 
+    def getResultsPath(self):
+        return f"{self.getDirectory()}/results.csv"
+
     def getCategoricalIdentifiers(self):
         match self:
             case Datasets.SAMPLE:
                 return ["zip", "gender"]
             case Datasets.BANK_CLIENTS:
-                return []
+                return ["job", "marital", "education", "housing", "loan"]
             case Datasets.ADULTS:
                 return ["workclass", "marital-status", "race", "sex", "native-country"]
             case _:
@@ -39,7 +42,7 @@ class Datasets(Enum):
             case Datasets.SAMPLE:
                 return ["age"]
             case Datasets.BANK_CLIENTS:
-                return []
+                return ["age", "balance"]
             case Datasets.ADULTS:
                 return ["age"]
             case _:
