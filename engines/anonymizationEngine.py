@@ -1,6 +1,7 @@
 import math
 
 from dataHandler.datasets import Datasets
+from engines.anonymizationType import AnonymizationType
 from engines.distanceEngine import DistanceEngine
 from engines.gilEngine import GILEngine
 from engines.informationLossEngine import InformationLossEngine
@@ -20,14 +21,16 @@ class AnonymizationEngine:
     beta: float
     k: int
     dataset: Datasets
+    type: AnonymizationType
 
-    def __init__(self, graph: Graph, alpha: float, beta: float, k: int, dataset: Datasets):
+    def __init__(self, graph: Graph, alpha: float, beta: float, k: int, dataset: Datasets, type: AnonymizationType):
         self.graph = graph
         self.graph_nodes = graph.nodes.copy()
         self.alpha = alpha
         self.beta = beta
         self.k = k
         self.dataset = dataset
+        self.type = type
 
     def anonymize(self):
         S: {int: Cluster} = {}
@@ -46,11 +49,17 @@ class AnonymizationEngine:
                 self.graph_nodes.remove(x_seed)
 
                 while len(S[i].nodes) < self.k and len(self.graph_nodes) != 0:
-                    X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
+                    X_star: Node
                     index = i
 
-                    # X_star, metric, index = InformationLossEngine().getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S), self.k)
-                    # X_star, metric = InformationLossEngine().getDiscernibilityMetricForCurrentClusterOnly(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]), self.k)
+                    match self.type:
+                        case AnonymizationType.SaNGreeA:
+                            X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
+                        case AnonymizationType.DISCERNIBILITY_ALL:
+                            X_star, metric, index = InformationLossEngine().getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S), self.k)
+                            index = index
+                        case AnonymizationType.DISCERNIBILITY:
+                            X_star, metric = InformationLossEngine().getDiscernibilityMetricForCurrentClusterOnly(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]), self.k)
 
                     S[index].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)

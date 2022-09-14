@@ -3,6 +3,7 @@ from dataHandler.graphGenerator import GraphGenerator
 from engines.anonymizationEngine import AnonymizationEngine
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets
+from engines.anonymizationType import AnonymizationType
 from engines.gilEngine import GILEngine
 from engines.graphEvaluationEngine import GraphEvaluationEngine
 from engines.resultCollector import ResultCollector
@@ -12,8 +13,7 @@ import time
 from engines.visualizationEngine import VisualizationEngine
 
 
-def run(dataset: Datasets, alpha: float, beta: float, k: int, vertex_degree: int, limit: int = -1,
-          shouldPrint: bool = False):
+def run(dataset: Datasets, alpha: float, beta: float, k: int, vertex_degree: int, type: AnonymizationType, limit: int = -1, shouldPrint: bool = False):
     start_time = time.time()
     features: pd.DataFrame = DataProcessor.loadFeatures(dataset)
 
@@ -25,7 +25,7 @@ def run(dataset: Datasets, alpha: float, beta: float, k: int, vertex_degree: int
 
     graph = Graph.create(edges, features, dataset)
 
-    partition = AnonymizationEngine(copy.copy(graph), alpha, beta, k, dataset).anonymize()
+    partition = AnonymizationEngine(copy.copy(graph), alpha, beta, k, dataset, type).anonymize()
     nsil = GraphEvaluationEngine(partition, graph).getNSIL()
     ngil = GILEngine(graph, partition, dataset).getNGIL()
     end_time = time.time()
@@ -43,13 +43,15 @@ def run(dataset: Datasets, alpha: float, beta: float, k: int, vertex_degree: int
         print("Execution time", exec_time, "s")
 
     result = ResultCollector.Result(k, alpha, beta, len(features), len(edges), round(ngil, 4), round(nsil, 4),
-                                    len(partition.clusters), exec_time, "SaNGreeA", vertex_degree)
+                                    len(partition.clusters), exec_time, type.value, vertex_degree)
 
     ResultCollector(dataset).saveResult(result)
 
 
 def runMultiple():
     for dataset in Datasets:
+        if dataset != Datasets.ADULTS:
+            continue
         for k in [2, 3, 4, 5, 6, 10]:
             for alpha in [0, 0.5, 1]:
                 for beta in [0, 0.5, 1]:
@@ -58,13 +60,17 @@ def runMultiple():
 
                     for limit in [100, 300, 500]:
                         for degree in [3, 5, 10, 20]:
-                            run(dataset, alpha, beta, k, degree, limit=limit)
+                            run(dataset, alpha, beta, k, degree, AnonymizationType.DISCERNIBILITY_ALL, limit)
 
 
 if __name__ == '__main__':
     print("Starting Clusterer...\n")
 
-    visualizer = VisualizationEngine(Datasets.ADULTS)
+    runMultiple()
+
+    # run(Datasets.SAMPLE, 1, 0, 3, 10, AnonymizationType.SaNGreeA)
+
+    # visualizer = VisualizationEngine(Datasets.ADULTS, AnonymizationType.DISCERNIBILITY_ALL)
     # visualizer.plotNGIL()
     # visualizer.plotNSIL()
-    visualizer.plotPerformance()
+    # visualizer.plotPerformance()
