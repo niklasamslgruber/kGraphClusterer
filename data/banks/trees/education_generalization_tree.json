@@ -1,0 +1,8 @@
+{
+  "*": [
+    "tertiary",
+    "secondary",
+    "unknown",
+    "primary"
+  ]
+}

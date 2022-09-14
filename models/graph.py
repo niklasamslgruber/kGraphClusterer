@@ -1,4 +1,6 @@
 import pandas as pd
+
+from dataHandler.datasets import Datasets
 from models.node import Node
 
 
@@ -8,7 +10,7 @@ class Graph:
     categorical_identifiers: [str] = []
 
     @staticmethod
-    def create(edges: pd.DataFrame, features: pd.DataFrame, numericalAttributes: [str], categoricalAttributes: [str]):
+    def create(edges: pd.DataFrame, features: pd.DataFrame, dataset: Datasets):
         graph = Graph()
         graph.nodes = []
 
@@ -21,8 +23,8 @@ class Graph:
             node.value = features.loc[index].to_dict()
             graph.nodes.append(node)
 
-        graph.numerical_identifiers = numericalAttributes
-        graph.categorical_identifiers = categoricalAttributes
+        graph.numerical_identifiers = dataset.getNumericalIdentifiers()
+        graph.categorical_identifiers = dataset.getCategoricalIdentifiers()
 
         assert len(graph.nodes) == features.index.size, f"Number of features ({features.index.size}) does not match number of nodes ({len(graph.nodes)}"
         return graph

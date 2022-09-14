@@ -1,0 +1,16 @@
+{
+  "*": [
+    "management",
+    "technician",
+    "entrepreneur",
+    "blue-collar",
+    "unknown",
+    "retired",
+    "admin",
+    "services",
+    "self-employed",
+    "unemployed",
+    "housemaid",
+    "student"
+  ]
+}

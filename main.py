@@ -1,37 +1,76 @@
 import pandas as pd
+from dataHandler.graphGenerator import GraphGenerator
 from engines.anonymizationEngine import AnonymizationEngine
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets
+from engines.anonymizationType import AnonymizationType
 from engines.gilEngine import GILEngine
 from engines.graphEvaluationEngine import GraphEvaluationEngine
-from dataHandler.graphGenerator import GraphGenerator
+from engines.resultCollector import ResultCollector
 from models.graph import Graph
 import copy
+import time
+from engines.visualizationEngine import VisualizationEngine
+
+
+def run(dataset: Datasets, alpha: float, beta: float, k: int, vertex_degree: int, type: AnonymizationType, limit: int = -1, shouldPrint: bool = False):
+    start_time = time.time()
+    features: pd.DataFrame = DataProcessor.loadFeatures(dataset)
+
+    if limit != -1:
+        features = features.sample(limit, random_state=1)
+
+    frame = GraphGenerator.generateRandomEdges(dataset, features, vertex_degree=vertex_degree, force=True)
+    edges: pd.DataFrame = frame
+
+    graph = Graph.create(edges, features, dataset)
+
+    partition = AnonymizationEngine(copy.copy(graph), alpha, beta, k, dataset, type).anonymize()
+    nsil = GraphEvaluationEngine(partition, graph).getNSIL()
+    ngil = GILEngine(graph, partition, dataset).getNGIL()
+    end_time = time.time()
+    exec_time = round(end_time - start_time, 4)
+
+    if shouldPrint:
+        print("\n-----")
+        print(f"Generated Clusters for dataset {dataset.name} (k = {k}, alpha = {alpha}, beta = {beta}):")
+        for (index, cluster) in enumerate(partition.clusters):
+            print(f"\tCluster {index + 1}:", cluster.getIds())
+
+        print("\nStatistics:")
+        print("\tNSIL:", nsil)
+        print("\tNGIL:", ngil)
+        print("Execution time", exec_time, "s")
+
+    result = ResultCollector.Result(k, alpha, beta, len(features), len(edges), round(ngil, 4), round(nsil, 4),
+                                    len(partition.clusters), exec_time, type.value, vertex_degree)
+
+    ResultCollector(dataset).saveResult(result)
+
+
+def runMultiple():
+    for dataset in Datasets:
+        if dataset != Datasets.ADULTS:
+            continue
+        for k in [2, 3, 4, 5, 6, 10]:
+            for alpha in [0, 0.5, 1]:
+                for beta in [0, 0.5, 1]:
+                    if alpha == 0 and beta == 0:
+                        continue
+
+                    for limit in [100, 300, 500]:
+                        for degree in [3, 5, 10, 20]:
+                            run(dataset, alpha, beta, k, degree, AnonymizationType.DISCERNIBILITY_ALL, limit)
+
 
 if __name__ == '__main__':
     print("Starting Clusterer...\n")
 
-    edges: pd.DataFrame = DataProcessor.loadEdges(Datasets.SAMPLE)
-    features: pd.DataFrame = DataProcessor.loadFeatures(Datasets.SAMPLE)
+    runMultiple()
 
-    numerical_identifiers: [str] = ["age"]
-    categorical_identifiers: [str] = ["zip", "gender"]
-    graph = Graph.create(edges, features, numerical_identifiers, categorical_identifiers)
+    # run(Datasets.SAMPLE, 1, 0, 3, 10, AnonymizationType.SaNGreeA)
 
-    partition = AnonymizationEngine(copy.copy(graph), 1, 0, 3).anonymize()
-    print("Clusters:")
-    for cluster in partition.clusters:
-        print("\t", cluster.getIds())
-
-    nsil = GraphEvaluationEngine().getNSIL(partition, graph)
-    ngil = GILEngine(graph, partition).getNGIL()
-    print("NSIL:", nsil)
-    print("NGIL:", ngil)
-
-
-    # DataProcessor.loadData(DataProcessor.Dataset.BANK_CLIENTS)
-    # DataProcessor.loadData(DataProcessor.Dataset.ADULTS)
-
-    GraphGenerator.generateRandomEdges(Datasets.ADULTS, num=100)
-    GraphGenerator.generateRandomEdges(Datasets.BANK_CLIENTS, num=100, limit=1000)
-
+    # visualizer = VisualizationEngine(Datasets.ADULTS, AnonymizationType.DISCERNIBILITY_ALL)
+    # visualizer.plotNGIL()
+    # visualizer.plotNSIL()
+    # visualizer.plotPerformance()

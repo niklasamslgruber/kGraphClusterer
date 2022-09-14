@@ -23,6 +23,15 @@ class DataProcessor:
         return frame
 
     @staticmethod
+    def getUniqueValues(dataset: Datasets):
+        frame = DataProcessor.loadFeatures(dataset)
+
+        for identifier in frame.columns:
+            if identifier in ["age", "balance"]:
+                continue
+            print(identifier, frame[identifier].unique())
+
+    @staticmethod
     def loadEdges(dataset: Datasets):
         if DataProcessor.__checkEdgeFile(dataset):
             frame = pd.read_csv(dataset.getEdgePath(), header=None)
@@ -42,7 +51,7 @@ class DataProcessor:
     @staticmethod
     def __processBankData() -> pd.DataFrame:
         dataset = Datasets.BANK_CLIENTS
-        frame = pd.read_csv("../data/raw/bank/bank-full.csv", sep=";")
+        frame = pd.read_csv("../data/banks/raw/bank-full.csv", sep=";")
 
         for column in ["contact", "day", "month", "duration", "campaign", "pdays", "previous", "poutcome"]:
             frame = frame.drop(column, axis=1)
@@ -56,9 +65,9 @@ class DataProcessor:
     @staticmethod
     def __processAdultData() -> pd.DataFrame:
         dataset = Datasets.ADULTS
-        frame = pd.read_csv("../data/raw/adult/adult.data", header=None)
-        frame.columns = ["age", "workclass", "finalWeight", "education", "education-num", "martial-status",
-                         "occupation", "relationship", "race", "sex", "captial-gain", "capital-loss", "hours-per-week",
+        frame = pd.read_csv("../data/adults/raw/adult.data", header=None)
+        frame.columns = ["age", "workclass", "finalWeight", "education", "education-num", "marital-status",
+                         "occupation", "relationship", "race", "sex", "capital-gain", "capital-loss", "hours-per-week",
                          "native-country", "income"]
 
         dataset.createDirectoryIfNotExists()

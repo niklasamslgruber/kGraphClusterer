@@ -9,18 +9,22 @@ from models.partition import Partition
 class GILEngine:
     graph: Graph
     partition: Partition
+    dataset: Datasets
 
-    def __init__(self, graph: Graph, partition: Partition):
+    def __init__(self, graph: Graph, partition: Partition, dataset: Datasets):
         self.graph = graph
         self.partition = partition
+        self.dataset = dataset
 
     # - CALCULATIONS
 
     # Normalized Generalization Information Loss for whole Graph (Definition 6)
     def getNGIL(self):
-        return self.getGraphGIL() / (
+        ngil = self.getGraphGIL() / (
                 len(self.graph.nodes) * (
                     len(self.graph.categorical_identifiers) + len(self.graph.numerical_identifiers)))
+        return 0 if ngil < 0 else ngil
+
 
     # Total Generalization Information Loss for whole Graph (Definition 5)
     def getGraphGIL(self):
@@ -55,7 +59,7 @@ class GILEngine:
 
         # Categorical Identifiers
         for categorical_attribute in self.graph.categorical_identifiers:
-            with open(Datasets.SAMPLE.getGeneralizationTree(categorical_attribute)) as json_file:
+            with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
                 total_height = self._getTreeDepth(data) - 1
 
@@ -88,7 +92,7 @@ class GILEngine:
         # Categorical Identifiers
         for categorical_attribute in self.graph.categorical_identifiers:
             should_subtract = True
-            with open(Datasets.SAMPLE.getGeneralizationTree(categorical_attribute)) as json_file:
+            with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
 
                 generalized_keys = []
