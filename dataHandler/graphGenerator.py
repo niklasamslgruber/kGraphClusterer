@@ -17,6 +17,7 @@ class GraphGenerator:
         self.threshold = threshold
 
     def generateEdges(self):
+        # Source: https://dataverse.harvard.edu/api/access/datafile/5635412
         frame = pd.read_csv("data/bitcoin2019-10_03.csv", low_memory=False).dropna()
         for column in frame.keys():
             if column == "source_address" or column == "destination_address":
