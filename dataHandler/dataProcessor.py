@@ -1,13 +1,15 @@
 from typing import Optional
 import pandas as pd
 from os.path import exists
+
+from constants import RANDOM_SEED
 from dataHandler.datasets import Datasets
 
 
 class DataProcessor:
 
     @staticmethod
-    def loadFeatures(dataset: Datasets) -> Optional[pd.DataFrame]:
+    def loadFeatures(dataset: Datasets, threshold: int) -> Optional[pd.DataFrame]:
         if not exists(dataset.value):
             print(f"Data for dataset {dataset.name} does not exist. Starting to process it now...")
             match dataset:
@@ -19,7 +21,46 @@ class DataProcessor:
                     return None
 
         frame = pd.read_csv(dataset.value, index_col="id")
-        return frame
+        features = frame.sample(threshold, random_state=RANDOM_SEED)
+        features = DataProcessor.loadAssociations(dataset, threshold, features)
+        return features
+
+    @staticmethod
+    def loadAssociations(dataset: Datasets, threshold: int, features: pd.DataFrame):
+        matched_features: pd.DataFrame
+        if not exists(dataset.getAssociationPath(threshold)):
+            matched_features = DataProcessor.__generateAssociations(dataset, threshold, features)
+        else:
+            matched_features = pd.read_csv(dataset.getAssociationPath(threshold))
+
+        features["transactionID"] = matched_features["transactionID"].values
+
+        # Verify that IDs and transactionIDs are correctly mapped
+        for (index, feature) in features.iterrows():
+            assert [feature["transactionID"]] == list(matched_features[matched_features["id"] == index]["transactionID"])
+
+        return features
+
+    @staticmethod
+    def __generateAssociations(dataset: Datasets, threshold: int, features: pd.DataFrame):
+        edges = DataProcessor.loadEdges(dataset, threshold)
+        node_ids = list(edges["node1"].unique())
+
+        assert len(node_ids) == threshold
+
+        index = features.index
+
+        associations = pd.DataFrame()
+        associations["id"] = index
+        associations["transactionID"] = node_ids
+
+        associations.to_csv(dataset.getAssociationPath(threshold), index=False)
+
+        for (index, row) in associations.iterrows():
+            assert len(associations[associations["id"] == row["id"]]) == 1
+            assert len(associations[associations["transactionID"] == row["transactionID"]]) == 1
+
+        return associations
 
     @staticmethod
     def getUniqueValues(dataset: Datasets):

@@ -1,2 +1,7 @@
-k,alpha,beta,size,edge_num,ngil,nsil,num_of_clusters,time,method
-3,1,1,100,264,0.1526,0.0,33,1.735,SaNGreeA
+k,alpha,beta,size,edge_num,ngil,nsil,num_of_clusters,time,method,seed
+3,1,1,100,362,0.2199,0.0018,33,1.7853,SaNGreeA,4
+3,1,1,100,362,0.2199,0.0018,33,1.8325,SaNGreeA,4
+3,1,1,100,362,0.2199,0.0018,33,1.7949,SaNGreeA,4
+3,1,1,100,362,0.2199,0.0018,33,1.8557,SaNGreeA,4
+3,1,1,100,362,0.2199,0.0018,33,1.8533,SaNGreeA,4
+3,1,1,100,362,0.2199,0.0018,33,1.8405,SaNGreeA,4

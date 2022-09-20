@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets
+from constants import RANDOM_SEED
 
 
 class GraphGenerator:
@@ -37,7 +38,7 @@ class GraphGenerator:
         count_frame = pd.concat([count_destination_frame, count_source_frame])
 
         ids = count_frame["id"].unique()
-        random.Random(4).shuffle(ids)
+        random.Random(RANDOM_SEED).shuffle(ids)
 
         edge_frame = pd.DataFrame()
         added_ids = []
@@ -66,6 +67,8 @@ class GraphGenerator:
                                     (frame["destination_address"] == id) & (frame["source_address"] != id))]
 
                 if filtered_source_frame.empty is False and len(added_ids) < self.threshold:
+                    if len(filtered_source_frame) > self.threshold - len(added_ids):
+                        filtered_source_frame = filtered_source_frame.iloc[0:self.threshold - len(added_ids)]
                     edge_frame = pd.concat([edge_frame, filtered_source_frame])
                     if id not in added_ids:
                         added_ids.append(id)
@@ -83,7 +86,7 @@ class GraphGenerator:
 
         for (index, row) in edge_frame.iterrows():
             if row["source_address"] not in added_ids:
-                assert False, f"Source includes ids ({row['destination_address']}) that are unknown"
+                assert False, f"Source includes ids ({row['source_address']}) that are unknown"
             if row["destination_address"] not in added_ids:
                 assert False, f"Destination includes ids ({row['destination_address']}) that are unknown"
 
@@ -112,11 +115,11 @@ class GraphGenerator:
             for sub_index in range(index, len(sub_graphs)):
                 partner_cluster = sorted(list(sub_graphs[sub_index]))
                 partner_cluster_factor = int(len(partner_cluster) * factor)
-                partner_cluster_random_edges = random.Random(4).choices(partner_cluster, k=partner_cluster_factor)
+                partner_cluster_random_edges = random.Random(RANDOM_SEED).choices(partner_cluster, k=partner_cluster_factor)
 
                 own_cluster = sorted(list(cluster))
                 own_cluster_factor = int(len(own_cluster) * factor)
-                own_cluster_random_edges = random.Random(4).choices(own_cluster, k=own_cluster_factor)
+                own_cluster_random_edges = random.Random(RANDOM_SEED).choices(own_cluster, k=own_cluster_factor)
 
                 for partner_node in partner_cluster_random_edges:
                     for own_node in own_cluster_random_edges:
@@ -135,7 +138,7 @@ class GraphGenerator:
     def drawGraph(self):
         edge_frame = DataProcessor.loadEdges(self.dataset, self.threshold)
         G = GraphGenerator.createGraphFromDataframe(edge_frame)
-        pos = nx.spring_layout(G, k=0.1, seed=4)
+        pos = nx.spring_layout(G, k=0.1, seed=RANDOM_SEED)
         nx.draw(G, pos=pos, with_labels=False, node_size=20, width=0.5)
         plt.show()
 

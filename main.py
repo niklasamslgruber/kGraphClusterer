@@ -16,8 +16,7 @@ from engines.visualizationEngine import VisualizationEngine
 def run(dataset: Datasets, alpha: float, beta: float, k: int, type: AnonymizationType, threshold: int,
         shouldPrint: bool = False):
     start_time = time.time()
-    features: pd.DataFrame = DataProcessor.loadFeatures(dataset)
-    features = features.sample(threshold, random_state=4)
+    features: pd.DataFrame = DataProcessor.loadFeatures(dataset, threshold)
 
     edges: pd.DataFrame = DataProcessor.loadEdges(dataset, threshold)
     assert len(edges["node1"].unique()) == len(features)
@@ -64,11 +63,12 @@ if __name__ == '__main__':
     print("Starting Clusterer...\n")
 
     # runMultiple()
-    # run(Datasets.ADULTS, 1, 1, 3, AnonymizationType.SaNGreeA, 100)
 
-    generator = GraphGenerator(dataset=Datasets.ADULTS, threshold=100)
+    generator = GraphGenerator(dataset=Datasets.ADULTS, threshold=10)
     generator.generateEdges()
-    generator.drawGraph()
+    # generator.drawGraph()
+
+    run(Datasets.ADULTS, 1, 1, 3, AnonymizationType.SaNGreeA, 10)
 
     # run(Datasets.SAMPLE, 1, 0, 3, 10, AnonymizationType.SaNGreeA)
     #

@@ -28,6 +28,17 @@ class Datasets(Enum):
             return f"{self.getEdgeDirectory()}/edges.csv"
         return f"{self.getEdgeDirectory()}/edges_{threshold}.csv"
 
+    def getAssociationDirectory(self):
+        path = f"{self.getDirectory()}/associations"
+        if not exists(path):
+            mkdir(path)
+        return path
+
+    def getAssociationPath(self, threshold: int):
+        if self == Datasets.SAMPLE:
+            return f"{self.getAssociationDirectory()}/associations.csv"
+        return f"{self.getAssociationDirectory()}/associations_{threshold}.csv"
+
     def getGeneralizationTree(self, attribute: str):
         return f"{self.getDirectory()}/trees/{attribute}_generalization_tree.json"
 
