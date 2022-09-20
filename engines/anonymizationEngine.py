@@ -56,10 +56,10 @@ class AnonymizationEngine:
                         case AnonymizationType.SaNGreeA:
                             X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
                         case AnonymizationType.DISCERNIBILITY_ALL:
-                            X_star, metric, index = InformationLossEngine().getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S), self.k)
+                            X_star, metric, index = InformationLossEngine(self.alpha, self.beta, self.k).getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S))
                             index = index
                         case AnonymizationType.DISCERNIBILITY:
-                            X_star, metric = InformationLossEngine().getDiscernibilityMetricForCurrentClusterOnly(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]), self.k)
+                            X_star, metric = InformationLossEngine(self.alpha, self.beta, self.k).getDiscernibilityMetricForCurrentClusterOnly(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]))
 
                     S[index].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)

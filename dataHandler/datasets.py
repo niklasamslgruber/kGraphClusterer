@@ -17,8 +17,16 @@ class Datasets(Enum):
         if not exists(self.getDirectory()):
             mkdir(self.getDirectory())
 
-    def getEdgePath(self):
-        return f"{self.getDirectory()}/edges.csv"
+    def getEdgeDirectory(self):
+        path = f"{self.getDirectory()}/edges"
+        if not exists(path):
+            mkdir(path)
+        return path
+
+    def getEdgePath(self, threshold: int):
+        if self == Datasets.SAMPLE:
+            return f"{self.getEdgeDirectory()}/edges.csv"
+        return f"{self.getEdgeDirectory()}/edges_{threshold}.csv"
 
     def getGeneralizationTree(self, attribute: str):
         return f"{self.getDirectory()}/trees/{attribute}_generalization_tree.json"

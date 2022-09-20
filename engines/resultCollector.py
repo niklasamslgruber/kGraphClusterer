@@ -16,9 +16,8 @@ class ResultCollector:
         num_of_clusters: int
         time: float
         method: str
-        vertex_degree: int
 
-        def __init__(self, k: int, alpha: float, beta: float, size: int, edge_num: int, ngil: float, nsil: float, num_of_clusters: int, time: float, method: str, vertex_degree: int):
+        def __init__(self, k: int, alpha: float, beta: float, size: int, edge_num: int, ngil: float, nsil: float, num_of_clusters: int, time: float, method: str):
             self.k = k
             self.alpha = alpha
             self.beta = beta
@@ -29,7 +28,6 @@ class ResultCollector:
             self.num_of_clusters = num_of_clusters
             self.time = time
             self.method = method
-            self.vertex_degree = vertex_degree
 
         def to_dict(self):
             return {
@@ -43,7 +41,6 @@ class ResultCollector:
                 "num_of_clusters": self.num_of_clusters,
                 "time": self.time,
                 "method": self.method,
-                "vertex_degree": self.vertex_degree
             }
 
     dataset: Datasets

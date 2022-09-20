@@ -5,7 +5,6 @@ from engines.anonymizationType import AnonymizationType
 
 
 class VisualizationEngine:
-
     dataset: Datasets
     type: AnonymizationType
 
@@ -60,6 +59,8 @@ class VisualizationEngine:
         for axItem in ax.ravel():
             axItem.legend(loc=2, prop={'size': 6})
             axItem.set(xlabel='k', ylabel=y_label)
+            if y != "time":
+                axItem.set_ylim(0, 1)
 
         plt.tight_layout()
 

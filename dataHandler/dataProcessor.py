@@ -19,7 +19,6 @@ class DataProcessor:
                     return None
 
         frame = pd.read_csv(dataset.value, index_col="id")
-        DataProcessor.__checkEdgeFile(dataset)
         return frame
 
     @staticmethod
@@ -32,17 +31,17 @@ class DataProcessor:
             print(identifier, frame[identifier].unique())
 
     @staticmethod
-    def loadEdges(dataset: Datasets):
-        if DataProcessor.__checkEdgeFile(dataset):
-            frame = pd.read_csv(dataset.getEdgePath(), header=None)
+    def loadEdges(dataset: Datasets, threshold: int):
+        if DataProcessor.__checkEdgeFile(dataset, threshold):
+            frame = pd.read_csv(dataset.getEdgePath(threshold), header=None)
             frame.columns = ["node1", "node2"]
             return frame
 
     # HELPER
 
     @staticmethod
-    def __checkEdgeFile(dataset: Datasets):
-        if not exists(dataset.getEdgePath()):
+    def __checkEdgeFile(dataset: Datasets, threshold: int):
+        if not exists(dataset.getEdgePath(threshold)):
             print(f"No edge file (edges.csv) found for {dataset.name}")
             return False
         return True
