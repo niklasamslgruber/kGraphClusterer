@@ -7,10 +7,12 @@ from engines.anonymizationType import AnonymizationType
 class VisualizationEngine:
     dataset: Datasets
     type: AnonymizationType
+    old: bool
 
-    def __init__(self, dataset: Datasets, type: AnonymizationType):
+    def __init__(self, dataset: Datasets, type: AnonymizationType, old: bool = True):
         self.dataset = dataset
         self.type = type
+        self.old = old
 
     def plotNGIL(self):
         fig, ax = self.__plotMetrics("ngil", "NGIL")
@@ -25,7 +27,7 @@ class VisualizationEngine:
         fig.savefig(f'{self.dataset.getImagePath()}/time_{self.type.name}.png', dpi=200)
 
     def __plotMetrics(self, y: str, y_label: str):
-        frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
+        frame = pd.read_csv(self.dataset.getResultsPath(old=self.old), header=0)
 
         fig, ax = plt.subplots(8, 3, figsize=(20, 40))
 

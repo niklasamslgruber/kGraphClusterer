@@ -64,7 +64,7 @@ class GraphGenerator:
                 else:
                     filtered_source_frame = frame[
                         ((frame["source_address"] == id) & (frame["destination_address"] != id)) | (
-                                    (frame["destination_address"] == id) & (frame["source_address"] != id))]
+                                (frame["destination_address"] == id) & (frame["source_address"] != id))]
 
                 if filtered_source_frame.empty is False and len(added_ids) < self.threshold:
                     if len(filtered_source_frame) > self.threshold - len(added_ids):
@@ -95,10 +95,15 @@ class GraphGenerator:
                 edge_frame.drop(index, axis=0, inplace=True)
 
         edge_frame_copy = edge_frame.copy()
+        edge_frame_copy.columns = ["destination_address", "source_address"]
+
         double_edge_frame = pd.concat([edge_frame, edge_frame_copy])
         assert len(double_edge_frame) == len(edge_frame) + len(edge_frame_copy)
+        double_edge_frame.to_csv(self.dataset.getEdgePath(self.threshold), index=False, header=False)
 
         final_edge_frame = self.__generateMissingClusterConnections(double_edge_frame)
+
+        final_edge_frame = final_edge_frame.drop_duplicates()
         final_edge_frame.to_csv(self.dataset.getEdgePath(self.threshold), index=False, header=False)
 
     # Make sure that the edge file does not contain unconnected subgraphs, but ONE connect graph
@@ -107,32 +112,40 @@ class GraphGenerator:
 
         assert len(G.nodes) >= self.threshold
 
-        sub_graphs = sorted(list(nx.connected_components(G)))
+        updated_graph = G
+        updated_edge_frame = edge_frame
+        count = 0
+        while len(list(nx.connected_components(updated_graph))) > 1:
+            sub_graphs = sorted(list(nx.connected_components(updated_graph)))
 
-        factor = 0.125
-        new_edges = []
-        for (index, cluster) in enumerate(sub_graphs):
-            for sub_index in range(index, len(sub_graphs)):
-                partner_cluster = sorted(list(sub_graphs[sub_index]))
-                partner_cluster_factor = int(len(partner_cluster) * factor)
-                partner_cluster_random_edges = random.Random(RANDOM_SEED).choices(partner_cluster, k=partner_cluster_factor)
+            factor = 0.125 + count
+            new_edges = []
+            for (index, cluster) in enumerate(sub_graphs):
+                for sub_index in range(index, len(sub_graphs)):
+                    partner_cluster = sorted(list(sub_graphs[sub_index]))
+                    partner_cluster_factor = int(len(partner_cluster) * factor)
+                    partner_cluster_random_edges = random.Random(RANDOM_SEED).choices(partner_cluster,
+                                                                                      k=partner_cluster_factor)
 
-                own_cluster = sorted(list(cluster))
-                own_cluster_factor = int(len(own_cluster) * factor)
-                own_cluster_random_edges = random.Random(RANDOM_SEED).choices(own_cluster, k=own_cluster_factor)
+                    own_cluster = sorted(list(cluster))
+                    own_cluster_factor = int(len(own_cluster) * factor)
+                    own_cluster_random_edges = random.Random(RANDOM_SEED).choices(own_cluster, k=own_cluster_factor)
 
-                for partner_node in partner_cluster_random_edges:
-                    for own_node in own_cluster_random_edges:
-                        if own_node != partner_node and partner_node not in own_cluster:
-                            G.add_edge(own_node, partner_node)
-                            new_edges.append([own_node, partner_node])
-                            new_edges.append([partner_node, own_node])
+                    for partner_node in partner_cluster_random_edges:
+                        for own_node in own_cluster_random_edges:
+                            if own_node != partner_node:
+                                G.add_edge(own_node, partner_node)
+                                new_edges.append([own_node, partner_node])
+                                new_edges.append([partner_node, own_node])
 
-        assert len(list(nx.connected_components(G))) == 1, "New graph still contains unconnected cluster"
+            new_frame = pd.DataFrame(new_edges, columns=["node1", "node2"])
+            updated_edge_frame = pd.concat([updated_edge_frame, new_frame])
 
-        new_frame = pd.DataFrame(new_edges)
-        updated_edge_frame = pd.concat([edge_frame, new_frame])
+            updated_graph = GraphGenerator.createGraphFromDataframe(updated_edge_frame)
+            if count + 0.0625 <= 1:
+                count += 0.0625
 
+        assert len(list(nx.connected_components(updated_graph))) == 1, "New graph still contains unconnected cluster"
         return updated_edge_frame
 
     def drawGraph(self):
@@ -141,6 +154,31 @@ class GraphGenerator:
         pos = nx.spring_layout(G, k=0.1, seed=RANDOM_SEED)
         nx.draw(G, pos=pos, with_labels=False, node_size=20, width=0.5)
         plt.show()
+
+    def getGraphStatistics(self):
+        edge_frame = DataProcessor.loadEdges(self.dataset, self.threshold)
+        G = GraphGenerator.createGraphFromDataframe(edge_frame)
+
+        total = len(G.nodes)
+        sum = 0
+        bigger_than_one = 0
+        smaller_than_one = 0
+
+        for node in G.nodes:
+            edges = len(G.edges(node))
+            if edges > 1:
+                bigger_than_one += 1
+            else:
+                smaller_than_one += 1
+            sum += edges
+
+        result = {
+            "nodes": len(G.nodes),
+            "edges": len(G.edges),
+            "avg_degree": sum / total,
+            "nodes_with_more_than_one_edge": bigger_than_one
+        }
+        return result
 
     @staticmethod
     def createGraphFromDataframe(edge_frame: pd.DataFrame) -> nx.Graph:
@@ -152,4 +190,3 @@ class GraphGenerator:
             G.add_edge(row["node1"], row["node2"])
 
         return G
-    # def associateFeatures(self, ids: [str], threshold: int = 1000):
