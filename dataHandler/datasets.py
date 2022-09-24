@@ -10,6 +10,18 @@ class Datasets(Enum):
     BANK_CLIENTS = f"{ROOT_DIR}/data/banks/banks.csv"
     SAMPLE = f"{ROOT_DIR}/data/sample/sample.csv"
 
+    @staticmethod
+    def getCase(dataset: str):
+        match dataset:
+            case Datasets.ADULTS.name:
+                return Datasets.ADULTS
+            case Datasets.BANK_CLIENTS.name:
+                return Datasets.BANK_CLIENTS
+            case Datasets.SAMPLE.name:
+                return Datasets.SAMPLE
+            case _:
+                return
+
     def getDirectory(self):
         return "/".join(self.value.split("/")[:-1])
 

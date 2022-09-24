@@ -20,7 +20,7 @@ class NGILTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(NGILTests, self).__init__(*args, **kwargs)
         self.edges = DataProcessor.loadEdges(Datasets.SAMPLE, -1)
-        self.features = DataProcessor.loadFeatures(Datasets.SAMPLE)
+        self.features = DataProcessor.loadFeatures(Datasets.SAMPLE, 9)
         self.graph = Graph().create(self.edges, self.features, Datasets.SAMPLE)
 
     def testGILCalculationForPartitions(self):

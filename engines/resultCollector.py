@@ -3,6 +3,8 @@ from os.path import exists
 
 from constants import RANDOM_SEED
 from dataHandler.datasets import Datasets
+from engines.anonymizationType import AnonymizationType
+from engines.visualizationEngine import VisualizationEngine
 
 
 class ResultCollector:
@@ -73,3 +75,9 @@ class ResultCollector:
 
         existingResults.columns = newData.keys()
         existingResults.to_csv(self.dataset.getResultsPath(), index=False)
+
+    def visualizeResults(self, method: AnonymizationType):
+        visualizer = VisualizationEngine(self.dataset, method)
+        visualizer.plotNGIL()
+        visualizer.plotNSIL()
+        visualizer.plotPerformance()

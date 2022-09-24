@@ -51,7 +51,6 @@ class AnonymizationEngine:
                 while len(S[i].nodes) < self.k and len(self.graph_nodes) != 0:
                     X_star: Node
                     index = i
-
                     match self.type:
                         case AnonymizationType.SaNGreeA:
                             X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]

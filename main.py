@@ -1,4 +1,6 @@
 import pandas as pd
+
+from config import FLAGS
 from dataHandler.graphGenerator import GraphGenerator
 from engines.anonymizationEngine import AnonymizationEngine
 from dataHandler.dataProcessor import DataProcessor
@@ -10,7 +12,6 @@ from engines.resultCollector import ResultCollector
 from models.graph import Graph
 import copy
 import time
-from engines.visualizationEngine import VisualizationEngine
 
 
 def run(dataset: Datasets, alpha: float, beta: float, k: int, type: AnonymizationType, threshold: int,
@@ -59,21 +60,28 @@ def runMultiple():
                         run(dataset, alpha, beta, k, AnonymizationType.DISCERNIBILITY_ALL, limit)
 
 
+def generateEdges(size: int, dataset: Datasets):
+    generator = GraphGenerator(dataset=dataset, threshold=size)
+    generator.generateEdges()
+
+
+def visualizeResults(dataset: Datasets, method: AnonymizationType):
+    ResultCollector(dataset).visualizeResults(method)
+
+
 if __name__ == '__main__':
     print("Starting Clusterer...\n")
+    print("Params:", ', '.join(f'{k}={v}' for k, v in vars(FLAGS).items()))
 
-    # runMultiple()
+    dataset = Datasets.getCase(FLAGS.dataset)
+    method = AnonymizationType.getCase(FLAGS.method)
 
-    generator = GraphGenerator(dataset=Datasets.ADULTS, threshold=10)
-    generator.generateEdges()
-    # generator.drawGraph()
+    if FLAGS.generate_edges is not None:
+        print(f"Generating {FLAGS.generate_edges} edges...")
+        generateEdges(FLAGS.generate_edges, dataset)
+    else:
+        run(dataset, FLAGS.alpha, FLAGS.beta, FLAGS.k, method, FLAGS.size)
 
-    run(Datasets.ADULTS, 1, 1, 3, AnonymizationType.SaNGreeA, 10)
-
-    # run(Datasets.SAMPLE, 1, 0, 3, 10, AnonymizationType.SaNGreeA)
-    #
-    # visualizer = VisualizationEngine(Datasets.ADULTS, AnonymizationType.DISCERNIBILITY)
-    # visualizer.drawGraph(100)
-    # visualizer.plotNGIL()
-    # visualizer.plotNSIL()
-    # visualizer.plotPerformance()
+    if FLAGS.plot:
+        print("Plotting results...")
+        visualizeResults(dataset, method)

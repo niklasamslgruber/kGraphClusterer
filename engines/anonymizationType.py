@@ -7,3 +7,14 @@ class AnonymizationType(Enum):
     DISCERNIBILITY_ALL = "Discernibility-All"
     DISCERNIBILITY = "Discernibility"
 
+    @staticmethod
+    def getCase(method: str):
+        match method:
+            case AnonymizationType.SaNGreeA.name:
+                return AnonymizationType.SaNGreeA
+            case AnonymizationType.DISCERNIBILITY_ALL.name:
+                return AnonymizationType.DISCERNIBILITY_ALL
+            case AnonymizationType.DISCERNIBILITY.name:
+                return AnonymizationType.DISCERNIBILITY
+            case _:
+                return

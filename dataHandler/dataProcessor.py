@@ -21,7 +21,10 @@ class DataProcessor:
                     return None
 
         frame = pd.read_csv(dataset.value, index_col="id")
-        features = frame.sample(threshold, random_state=RANDOM_SEED)
+        if threshold < len(frame):
+            features = frame.sample(threshold, random_state=RANDOM_SEED)
+        else:
+            features = frame
         features = DataProcessor.loadAssociations(dataset, threshold, features)
         return features
 
@@ -61,15 +64,6 @@ class DataProcessor:
             assert len(associations[associations["transactionID"] == row["transactionID"]]) == 1
 
         return associations
-
-    @staticmethod
-    def getUniqueValues(dataset: Datasets):
-        frame = DataProcessor.loadFeatures(dataset)
-
-        for identifier in frame.columns:
-            if identifier in ["age", "balance"]:
-                continue
-            print(identifier, frame[identifier].unique())
 
     @staticmethod
     def loadEdges(dataset: Datasets, threshold: int):
