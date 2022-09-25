@@ -7,6 +7,7 @@ class AnonymizationType(Enum):
     DISCERNIBILITY = "Discernibility"
     PRECISION = "Precision"
     CLASSIFICATION_METRIC = "Classification_Metric"
+    NORMALIZED_CERTAINTY_PENALTY = "Normalized_Certainty_Penalty"
 
     @staticmethod
     def getCase(method: str):
@@ -19,5 +20,7 @@ class AnonymizationType(Enum):
                 return AnonymizationType.PRECISION
             case AnonymizationType.CLASSIFICATION_METRIC.name:
                 return AnonymizationType.CLASSIFICATION_METRIC
+            case AnonymizationType.NORMALIZED_CERTAINTY_PENALTY.name:
+                return AnonymizationType.NORMALIZED_CERTAINTY_PENALTY
             case _:
                 return

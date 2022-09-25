@@ -160,6 +160,27 @@ class GILEngine:
             return 1 + max(GILEngine.getTreeDepth(a) for a in data)
         return 0
 
+    @staticmethod
+    def getNumberOfLeaves(data: dict, leaves_count: int = 0):
+        count = leaves_count
+        if isinstance(data, dict):
+            for key in data.keys():
+                count += 1
+                value = data[key]
+
+                if isinstance(value, dict):
+                    return GILEngine.getNumberOfLeaves(value, count)
+                elif isinstance(value, list):
+                    count += len(value)
+                else:
+                    count += 1
+        elif isinstance(data, list):
+            count = len(data)
+        else:
+            count = 1
+
+        return count
+
     # Generates a subtree of the generalization tree for a given key - A(gen(cl)[Cj])
     @staticmethod
     def getSubHierarchyTree(data: dict, searchKey: str):

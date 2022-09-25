@@ -62,6 +62,9 @@ class AnonymizationEngine:
                         case AnonymizationType.CLASSIFICATION_METRIC:
                             engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
                             X_star, metric = engine.getClassificationMetric(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case AnonymizationType.NORMALIZED_CERTAINTY_PENALTY:
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getNormalizedCertaintyPenalty(copy.copy(self.graph_nodes), copy.copy(S[i]))
 
                     S[i].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)

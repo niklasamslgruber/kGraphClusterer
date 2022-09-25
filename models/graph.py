@@ -8,11 +8,13 @@ class Graph:
     nodes: [Node] = []
     numerical_identifiers: [str] = []
     categorical_identifiers: [str] = []
+    features: pd.DataFrame
 
     @staticmethod
     def create(edges: pd.DataFrame, features: pd.DataFrame, dataset: Datasets):
         graph = Graph()
         graph.nodes = []
+        graph.features = features
 
         assert "node1" in edges.columns and "node2" in edges.columns, f"Edges need to have the headers 'node1' and 'node2', but found only {edges.columns.values}"
         for index, row in features.iterrows():

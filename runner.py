@@ -44,7 +44,7 @@ class Runner:
 
         graph = Graph.create(edges, features, dataset)
 
-        partition = AnonymizationEngine(copy.copy(graph), alpha, beta, k, dataset,type).anonymize()
+        partition = AnonymizationEngine(copy.copy(graph), alpha, beta, k, dataset, type).anonymize()
         nsil = GraphEvaluationEngine(partition, graph).getNSIL()
         ngil = GILEngine(graph, partition, dataset).getNGIL()
         end_time = time.time()

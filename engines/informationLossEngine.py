@@ -126,6 +126,57 @@ class InformationLossEngine:
 
         return optimal_case
 
+    # Source: https://dl.acm.org/doi/pdf/10.1145/1538909.1538911
+    def getNormalizedCertaintyPenalty(self, graph_nodes: [Node], S_original: Cluster) -> (Node, int):
+        all_quasi_identifiers = self.dataset.getCategoricalIdentifiers() + self.dataset.getNumericalIdentifiers()
+        categorical_data: {str: dict} = {}
+        for categorical_attribute in self.dataset.getCategoricalIdentifiers():
+            with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
+                data = json.load(json_file)
+                categorical_data[categorical_attribute] = data
+
+        numerical_data: {str: float} = {}
+        for numerical_attribute in self.dataset.getNumericalIdentifiers():
+            graph_values = list(map(lambda graph_node: graph_node.value[numerical_attribute], self.graph.nodes))
+            numerical_data[numerical_attribute] = max(graph_values) - min(graph_values)
+
+        optimal_case: (Node, int) = (None, math.inf)
+        for node in graph_nodes.copy():
+            S = copy.deepcopy(S_original)
+            S.nodes.append(node)
+
+            cluster = Cluster(S.nodes)
+            generalized_values = GILEngine(self.graph, Partition([]), self.dataset).mergeNodes(cluster)
+            ncp_value = 0
+
+            for categorical_attribute in self.dataset.getCategoricalIdentifiers():
+                data = categorical_data[categorical_attribute]
+                subtree = GILEngine.getSubHierarchyTree(data, generalized_values[categorical_attribute][0])
+                cardU = GILEngine.getNumberOfLeaves(subtree)
+
+                if cardU == 1:
+                    ncp_value += 0
+                else:
+                    distinct_values = len(self.graph.features[categorical_attribute].unique())
+                    ncp_value += (1 / len(all_quasi_identifiers)) * (cardU / distinct_values)
+
+            for numerical_attribute in self.dataset.getNumericalIdentifiers():
+                new_value = generalized_values[numerical_attribute]
+
+                domain_range = numerical_data[numerical_attribute]
+                cluster_range = max(new_value) - min(new_value)
+
+                ncp_value += (1 / len(all_quasi_identifiers)) * (cluster_range / domain_range)
+
+            ncp_metric = self.alpha * ncp_value
+
+            ncp_metric += self.beta * DistanceEngine(self.graph).getNodeClusterDistance(cluster, node)
+
+            if ncp_metric < optimal_case[1]:
+                optimal_case = (node, ncp_metric)
+
+        return optimal_case
+
     # def getNormalizedCertaintyPenalty:
     #     return 4
     #
