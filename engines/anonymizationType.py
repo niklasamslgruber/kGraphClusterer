@@ -6,6 +6,7 @@ class AnonymizationType(Enum):
     SaNGreeA = "SaNGreeA"
     DISCERNIBILITY_ALL = "Discernibility-All"
     DISCERNIBILITY = "Discernibility"
+    PRECISION = "Precision"
 
     @staticmethod
     def getCase(method: str):
@@ -16,5 +17,7 @@ class AnonymizationType(Enum):
                 return AnonymizationType.DISCERNIBILITY_ALL
             case AnonymizationType.DISCERNIBILITY.name:
                 return AnonymizationType.DISCERNIBILITY
+            case AnonymizationType.PRECISION.name:
+                return AnonymizationType.PRECISION
             case _:
                 return

@@ -60,11 +60,11 @@ class GILEngine:
         for categorical_attribute in self.graph.categorical_identifiers:
             with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
                 data = json.load(json_file)
-                total_height = self._getTreeDepth(data) - 1
+                total_height = GILEngine.getTreeDepth(data) - 1
 
                 generalized_sum_key = generalized_values[categorical_attribute][0]
-                sub_generalization_tree = self._getSubHierarchyTree(data, generalized_sum_key)
-                sub_height = self._getTreeDepth(sub_generalization_tree)
+                sub_generalization_tree = self.getSubHierarchyTree(data, generalized_sum_key)
+                sub_height = GILEngine.getTreeDepth(sub_generalization_tree)
                 if generalized_values[categorical_attribute][1] is True:
                     sub_height -= 1
 
@@ -152,19 +152,21 @@ class GILEngine:
         return return_value
 
     # Calculates the depth of the generalization tree - height(X)
-    def _getTreeDepth(self, data: dict):
+    @staticmethod
+    def getTreeDepth(data: dict):
         if type(data) is dict and data:
-            return 1 + max(self._getTreeDepth(data[a]) for a in data)
+            return 1 + max(GILEngine.getTreeDepth(data[a]) for a in data)
         if type(data) is list and data:
-            return 1 + max(self._getTreeDepth(a) for a in data)
+            return 1 + max(GILEngine.getTreeDepth(a) for a in data)
         return 0
 
     # Generates a subtree of the generalization tree for a given key - A(gen(cl)[Cj])
-    def _getSubHierarchyTree(self, data: dict, searchKey: str):
+    @staticmethod
+    def getSubHierarchyTree(data: dict, searchKey: str):
         if searchKey not in data.keys():
             for key, value in data.items():
                 if isinstance(value, dict):
-                    return self._getSubHierarchyTree(data[key], searchKey)
+                    return GILEngine.getSubHierarchyTree(data[key], searchKey)
                 elif isinstance(value, list):
                     if searchKey in value:
                         return searchKey
