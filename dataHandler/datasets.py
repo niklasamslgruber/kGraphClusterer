@@ -6,9 +6,9 @@ from constants import ROOT_DIR
 
 @unique
 class Datasets(Enum):
-    ADULTS = f"{ROOT_DIR}/data/adults/adults.csv"
-    BANK_CLIENTS = f"{ROOT_DIR}/data/banks/banks.csv"
-    SAMPLE = f"{ROOT_DIR}/data/sample/sample.csv"
+    ADULTS = "adults"
+    BANK_CLIENTS = "banks"
+    SAMPLE = "sample"
 
     @staticmethod
     def getCase(dataset: str):
@@ -22,46 +22,36 @@ class Datasets(Enum):
             case _:
                 return
 
-    def getDirectory(self):
-        return "/".join(self.value.split("/")[:-1])
-
     def createDirectoryIfNotExists(self):
-        if not exists(self.getDirectory()):
-            mkdir(self.getDirectory())
+        if not exists(self.__getDirectory()):
+            mkdir(self.__getDirectory())
 
-    def getEdgeDirectory(self):
-        path = f"{self.getDirectory()}/edges"
-        if not exists(path):
-            mkdir(path)
-        return path
+    def getFeaturePath(self):
+        return f"{self.__getDirectory()}/features.csv"
 
     def getEdgePath(self, threshold: int):
         if self == Datasets.SAMPLE:
-            return f"{self.getEdgeDirectory()}/edges.csv"
-        return f"{self.getEdgeDirectory()}/edges_{threshold}.csv"
-
-    def getAssociationDirectory(self):
-        path = f"{self.getDirectory()}/associations"
-        if not exists(path):
-            mkdir(path)
-        return path
+            return f"{self.__getEdgeDirectory()}/edges.csv"
+        return f"{self.__getEdgeDirectory()}/edges_{threshold}.csv"
 
     def getAssociationPath(self, threshold: int):
         if self == Datasets.SAMPLE:
-            return f"{self.getAssociationDirectory()}/associations.csv"
-        return f"{self.getAssociationDirectory()}/associations_{threshold}.csv"
+            return f"{self.__getAssociationDirectory()}/associations.csv"
+        return f"{self.__getAssociationDirectory()}/associations_{threshold}.csv"
 
     def getGeneralizationTree(self, attribute: str):
-        return f"{self.getDirectory()}/trees/{attribute}_generalization_tree.json"
+        return f"{self.__getDirectory()}/trees/{attribute}_generalization_tree.json"
 
     def getResultsPath(self, old: bool = False):
-        return f"{self.getDirectory()}/{'results_random' if old else 'results'}.csv"
+        return f"{self.__getDirectory()}/{'results_random' if old else 'results'}.csv"
 
     def getImagePath(self):
-        path = f"{self.getDirectory()}/images"
+        path = f"{self.__getDirectory()}/images"
         if not exists(path):
             mkdir(path)
         return path
+
+    # Identifiers
 
     def getCategoricalIdentifiers(self):
         match self:
@@ -84,3 +74,21 @@ class Datasets(Enum):
                 return ["age"]
             case _:
                 return []
+
+    # Helper
+
+    def __getDirectory(self):
+        return "/".join(f"{ROOT_DIR}/data/{self.value}".split("/"))
+
+    def __getEdgeDirectory(self):
+        path = f"{self.__getDirectory()}/edges"
+        if not exists(path):
+            mkdir(path)
+        return path
+
+    def __getAssociationDirectory(self):
+        path = f"{self.__getDirectory()}/associations"
+        if not exists(path):
+            mkdir(path)
+        return path
+

@@ -16,15 +16,17 @@ class InformationLossEngine:
     beta: float
     k: int
     dataset: Datasets
+    graph: Graph
 
-    def __init__(self, alpha: float, beta: float, k: int, dataset: Datasets):
+    def __init__(self, alpha: float, beta: float, k: int, dataset: Datasets, graph: Graph):
         self.alpha = alpha
         self.beta = beta
         self.k = k
         self.dataset = dataset
+        self.graph = graph
 
     # http://www.tdp.cat/issues11/tdp.a169a14.pdf
-    def getDiscernibilityMetric(self, graph: Graph, graph_nodes: [Node], S_original: Cluster) -> (
+    def getDiscernibilityMetric(self, graph_nodes: [Node], S_original: Cluster) -> (
             Node, int):
         optimal_case: (Node, int) = (None, math.inf)
         for node in graph_nodes.copy():
@@ -35,11 +37,11 @@ class InformationLossEngine:
             disc_metric = 0
 
             if len(cluster.nodes) < self.k:
-                disc_metric += self.alpha * len(graph.nodes) * len(cluster.nodes)
+                disc_metric += self.alpha * len(self.graph.nodes) * len(cluster.nodes)
             else:
                 disc_metric += self.alpha * math.pow(len(cluster.nodes), 2)
 
-            disc_metric += self.beta * DistanceEngine(graph).getNodeClusterDistance(cluster, node)
+            disc_metric += self.beta * DistanceEngine(self.graph).getNodeClusterDistance(cluster, node)
 
             if disc_metric < optimal_case[1]:
                 optimal_case = (node, disc_metric)
@@ -47,7 +49,7 @@ class InformationLossEngine:
         return optimal_case
 
     # Source: https://dataprivacylab.org/dataprivacy/projects/kanonymity/kanonymity2.pdf
-    def getPrecision(self, graph: Graph, graph_nodes: [Node], S_original: Cluster) -> (Node, int):
+    def getPrecision(self, graph_nodes: [Node], S_original: Cluster) -> (Node, int):
         dghs: {str: dict} = {}
         for categorical_attribute in self.dataset.getCategoricalIdentifiers():
             with open(self.dataset.getGeneralizationTree(categorical_attribute)) as json_file:
@@ -56,7 +58,7 @@ class InformationLossEngine:
 
         numerical_dghs: {str: float} = {}
         for numerical_attribute in self.dataset.getNumericalIdentifiers():
-            graph_values = list(map(lambda graph_node: graph_node.value[numerical_attribute], graph.nodes))
+            graph_values = list(map(lambda graph_node: graph_node.value[numerical_attribute], self.graph.nodes))
             numerical_dghs[numerical_attribute] = max(graph_values) - min(graph_values)
 
         optimal_case: (Node, int) = (None, 0)
@@ -65,7 +67,7 @@ class InformationLossEngine:
             S.nodes.append(node)
 
             cluster = Cluster(S.nodes)
-            generalized_values = GILEngine(graph, Partition([]), self.dataset).mergeNodes(cluster)
+            generalized_values = GILEngine(self.graph, Partition([]), self.dataset).mergeNodes(cluster)
             sum_value = 0
 
             for categorical_attribute in self.dataset.getCategoricalIdentifiers():
@@ -91,7 +93,7 @@ class InformationLossEngine:
                 self.dataset.getNumericalIdentifiers())) * len(cluster.nodes))))
 
             # Subtract distance because distance is better if smaller but precision is better if bigger
-            disc_metric -= self.beta * DistanceEngine(graph).getNodeClusterDistance(cluster, node)
+            disc_metric -= self.beta * DistanceEngine(self.graph).getNodeClusterDistance(cluster, node)
 
             if disc_metric > optimal_case[1]:
                 optimal_case = (node, disc_metric)

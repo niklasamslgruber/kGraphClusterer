@@ -1,7 +1,6 @@
 from typing import Optional
 import pandas as pd
 from os.path import exists
-
 from constants import RANDOM_SEED
 from dataHandler.datasets import Datasets
 
@@ -10,7 +9,7 @@ class DataProcessor:
 
     @staticmethod
     def loadFeatures(dataset: Datasets, threshold: int) -> Optional[pd.DataFrame]:
-        if not exists(dataset.value):
+        if not exists(dataset.getFeaturePath()):
             print(f"Data for dataset {dataset.name} does not exist. Starting to process it now...")
             match dataset:
                 case Datasets.BANK_CLIENTS:
@@ -20,7 +19,7 @@ class DataProcessor:
                 case _:
                     return None
 
-        frame = pd.read_csv(dataset.value, index_col="id")
+        frame = pd.read_csv(dataset.getFeaturePath(), index_col="id")
         if threshold < len(frame):
             features = frame.sample(threshold, random_state=RANDOM_SEED)
         else:
@@ -92,7 +91,7 @@ class DataProcessor:
 
         dataset.createDirectoryIfNotExists()
 
-        frame.to_csv(dataset.value, index_label="id")
+        frame.to_csv(dataset.getFeaturePath(), index_label="id")
         return frame
 
     # Source: https://archive.ics.uci.edu/ml/datasets/Adult
@@ -106,5 +105,5 @@ class DataProcessor:
 
         dataset.createDirectoryIfNotExists()
 
-        frame.to_csv(dataset.value, index_label="id")
+        frame.to_csv(dataset.getFeaturePath(), index_label="id")
         return frame

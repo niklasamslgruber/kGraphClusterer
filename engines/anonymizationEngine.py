@@ -54,9 +54,11 @@ class AnonymizationEngine:
                         case AnonymizationType.SaNGreeA:
                             X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
                         case AnonymizationType.DISCERNIBILITY:
-                            X_star, metric = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset).getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]))
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getDiscernibilityMetric(copy.copy(self.graph_nodes), copy.copy(S[i]))
                         case AnonymizationType.PRECISION:
-                            X_star, metric = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset).getPrecision(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]))
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getPrecision(copy.copy(self.graph_nodes), copy.copy(S[i]))
 
                     S[i].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)
@@ -71,6 +73,8 @@ class AnonymizationEngine:
                 pbar.update(old_length - len(self.graph_nodes))
 
         return Partition(final_clusters)
+
+    # SaNGreeA
 
     def __disperseCluster(self, partition_dict, cluster):
         partition = Partition(list(map(lambda key: partition_dict[key], partition_dict.keys())))
