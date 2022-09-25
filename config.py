@@ -13,7 +13,7 @@ parser.add_argument('-a', '--alpha', default=default_alpha, type=int, help=f"wei
 default_beta = 0.5
 parser.add_argument('-b', '--beta', default=default_beta, type=int, help=f"weight of structural information loss (default: {default_beta})", metavar='')
 
-default_size = 300
+default_size = 100
 parser.add_argument('-n', '--size', default=default_size, type=int, help=f"dataset size (default: {default_size})", metavar='')
 
 available_methods = [type.name for type in AnonymizationType]
@@ -23,6 +23,6 @@ parser.add_argument('--plot', default=False, action='store_true', help="plot res
 parser.add_argument('--generate_edges', type=int, help=f"generate X edges based on the BTC transaction dataset", metavar='')
 
 available_datasets = [Datasets.ADULTS.name, Datasets.BANK_CLIENTS.name]
-parser.add_argument('--dataset', default=available_datasets[0], type=str, help=f"information loss metric for anonymization (available: {', '.join(available_datasets)}) (default: {available_datasets[0]})", metavar='')
+parser.add_argument('--dataset', default=available_datasets[0], type=str, help=f"choose dataset (available: {', '.join(available_datasets)}) (default: {available_datasets[0]})", metavar='')
 
 FLAGS = parser.parse_args()

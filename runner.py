@@ -75,7 +75,7 @@ class Runner:
 
     def runMetrics(self):
         for metric in AnonymizationType:
-            self.run(self.dataset, 1, 1, 3, metric, 100)
+            self.run(self.dataset, FLAGS.alpha, FLAGS.beta, FLAGS.k, metric, FLAGS.size)
 
     def generateEdges(self):
         generator = GraphGenerator(dataset=self.dataset, threshold=self.threshold)
