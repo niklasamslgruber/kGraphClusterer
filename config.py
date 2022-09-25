@@ -16,7 +16,7 @@ parser.add_argument('-b', '--beta', default=default_beta, type=int, help=f"weigh
 default_size = 300
 parser.add_argument('-n', '--size', default=default_size, type=int, help=f"dataset size (default: {default_size})", metavar='')
 
-available_methods = [AnonymizationType.SaNGreeA.name, AnonymizationType.DISCERNIBILITY.name, AnonymizationType.PRECISION.name, AnonymizationType.CLASSIFICATION_METRIC.name, AnonymizationType.NORMALIZED_CERTAINTY_PENALTY.name]
+available_methods = [type.name for type in AnonymizationType]
 parser.add_argument('-m', '--method', default=available_methods[0], type=str, help=f"information loss metric for anonymization (available: {', '.join(available_methods)}) (default: {available_methods[0]})", metavar='')
 
 parser.add_argument('--plot', default=False, action='store_true', help="plot results")
