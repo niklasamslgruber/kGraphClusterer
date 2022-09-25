@@ -100,12 +100,32 @@ class InformationLossEngine:
 
         return optimal_case
 
-    # def getNormalizedAverageEquivalenceClassSizeMetric:
-    #     return 2.5
-    #
-    # def getClassificationMetric:
-    #     return 3
-    #
+    # Source: https://dl.acm.org/doi/pdf/10.1145/775047.775089
+    def getClassificationMetric(self, graph_nodes: [Node], S_original: Cluster) -> (Node, int):
+        optimal_case: (Node, int) = (None, math.inf)
+        for node in graph_nodes.copy():
+            S = copy.deepcopy(S_original)
+
+            cluster = Cluster(S.nodes)
+
+            metric_value = 0
+            for cluster_node in cluster.nodes:
+                for categorical_attribute in self.dataset.getCategoricalIdentifiers():
+                    if cluster_node.value[categorical_attribute] != node.value[categorical_attribute]:
+                        metric_value += 1
+
+                for numerical_attribute in self.dataset.getNumericalIdentifiers():
+                    if cluster_node.value[numerical_attribute] != node.value[numerical_attribute]:
+                        metric_value += 1
+
+            classification_metric = self.alpha * (metric_value / len(cluster.nodes))
+            classification_metric += self.beta * DistanceEngine(self.graph).getNodeClusterDistance(cluster, node)
+
+            if classification_metric < optimal_case[1]:
+                optimal_case = (node, classification_metric)
+
+        return optimal_case
+
     # def getNormalizedCertaintyPenalty:
     #     return 4
     #
