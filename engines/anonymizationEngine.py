@@ -50,18 +50,23 @@ class AnonymizationEngine:
 
                 while len(S[i].nodes) < self.k and len(self.graph_nodes) != 0:
                     X_star: Node
-                    index = i
-
                     match self.type:
                         case AnonymizationType.SaNGreeA:
                             X_star = self._getArgminNode(self.alpha, self.beta, S[i])[1]
-                        case AnonymizationType.DISCERNIBILITY_ALL:
-                            X_star, metric, index = InformationLossEngine().getDiscernibilityMetric(self.graph, copy.copy(self.graph_nodes), copy.copy(S), self.k)
-                            index = index
                         case AnonymizationType.DISCERNIBILITY:
-                            X_star, metric = InformationLossEngine().getDiscernibilityMetricForCurrentClusterOnly(self.graph, copy.copy(self.graph_nodes), copy.copy(S[i]), self.k)
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getDiscernibilityMetric(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case AnonymizationType.PRECISION:
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getPrecision(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case AnonymizationType.CLASSIFICATION_METRIC:
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getClassificationMetric(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case AnonymizationType.NORMALIZED_CERTAINTY_PENALTY:
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getNormalizedCertaintyPenalty(copy.copy(self.graph_nodes), copy.copy(S[i]))
 
-                    S[index].nodes.append(X_star)
+                    S[i].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)
 
                 if len(S[i].nodes) < self.k:
@@ -74,6 +79,8 @@ class AnonymizationEngine:
                 pbar.update(old_length - len(self.graph_nodes))
 
         return Partition(final_clusters)
+
+    # SaNGreeA
 
     def __disperseCluster(self, partition_dict, cluster):
         partition = Partition(list(map(lambda key: partition_dict[key], partition_dict.keys())))

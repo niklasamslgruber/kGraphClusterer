@@ -3,6 +3,7 @@ import pandas as pd
 from engines.anonymizationEngine import AnonymizationEngine
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets
+from engines.anonymizationType import AnonymizationType
 from engines.gilEngine import GILEngine
 from engines.graphEvaluationEngine import GraphEvaluationEngine
 from models.graph import Graph
@@ -18,8 +19,8 @@ class NGILTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(NGILTests, self).__init__(*args, **kwargs)
-        self.edges = DataProcessor.loadEdges(Datasets.SAMPLE)
-        self.features = DataProcessor.loadFeatures(Datasets.SAMPLE)
+        self.edges = DataProcessor.loadEdges(Datasets.SAMPLE, -1)
+        self.features = DataProcessor.loadFeatures(Datasets.SAMPLE, 9)
         self.graph = Graph().create(self.edges, self.features, Datasets.SAMPLE)
 
     def testGILCalculationForPartitions(self):
@@ -51,7 +52,7 @@ class NGILTests(unittest.TestCase):
             self.assertEqual(nsil, nsil_values[index])
 
     def testAnonymizerWithBetaZero(self):
-        anonymizer = AnonymizationEngine(self.graph, 1, 0, 3, Datasets.SAMPLE)
+        anonymizer = AnonymizationEngine(self.graph, 1, 0, 3, Datasets.SAMPLE, AnonymizationType.SaNGreeA)
         result: Partition = anonymizer.anonymize()
         self.assertEqual(len(result.clusters), 3)
 
@@ -62,7 +63,7 @@ class NGILTests(unittest.TestCase):
             self.assertTrue(cluster in real_result)
 
     def testAnonymizerWithAlphaZero(self):
-        anonymizer = AnonymizationEngine(self.graph, 0, 1, 3, Datasets.SAMPLE)
+        anonymizer = AnonymizationEngine(self.graph, 0, 1, 3, Datasets.SAMPLE, AnonymizationType.SaNGreeA)
         result: Partition = anonymizer.anonymize()
         self.assertEqual(len(result.clusters), 3)
 
