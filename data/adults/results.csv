@@ -5,3 +5,4 @@ k,alpha,beta,size,edge_num,ngil,nsil,num_of_clusters,time,method,seed
 3,1,1,100,362,0.2199,0.0018,33,1.8557,SaNGreeA,4
 3,1,1,100,362,0.2199,0.0018,33,1.8533,SaNGreeA,4
 3,1,1,100,362,0.2199,0.0018,33,1.8405,SaNGreeA,4
+3,1,1,100,362,0.5132,0.0013,33,0.6155,Discernibility,4

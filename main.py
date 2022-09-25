@@ -47,7 +47,7 @@ def run(dataset: Datasets, alpha: float, beta: float, k: int, type: Anonymizatio
     ResultCollector(dataset).saveResult(result)
 
 
-def runMultiple():
+def runMultiple(method: AnonymizationType):
     for dataset in Datasets:
         if dataset != Datasets.ADULTS:
             continue
@@ -57,7 +57,7 @@ def runMultiple():
                     if alpha == 0 and beta == 0:
                         continue
                     for limit in [100, 300, 500]:
-                        run(dataset, alpha, beta, k, AnonymizationType.DISCERNIBILITY_ALL, limit)
+                        run(dataset, alpha, beta, k, method, limit)
 
 
 def generateEdges(size: int, dataset: Datasets):
