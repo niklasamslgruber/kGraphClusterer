@@ -77,7 +77,7 @@ class ResultCollector:
         existingResults.to_csv(self.dataset.getResultsPath(), index=False)
 
     def visualizeResults(self, method: AnonymizationType):
-        visualizer = VisualizationEngine(self.dataset, method)
+        visualizer = VisualizationEngine(self.dataset, method, 0)
         visualizer.plotNGIL()
         visualizer.plotNSIL()
         visualizer.plotPerformance()

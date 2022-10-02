@@ -11,7 +11,6 @@ from constants import RANDOM_SEED
 class GraphGenerator:
     dataset: Datasets
     threshold: int
-    path: str
 
     def __init__(self, dataset: Datasets, threshold: int = 100):
         self.dataset = dataset
@@ -147,13 +146,6 @@ class GraphGenerator:
 
         assert len(list(nx.connected_components(updated_graph))) == 1, "New graph still contains unconnected cluster"
         return updated_edge_frame
-
-    def drawGraph(self):
-        edge_frame = DataProcessor.loadEdges(self.dataset, self.threshold)
-        G = GraphGenerator.createGraphFromDataframe(edge_frame)
-        pos = nx.spring_layout(G, k=0.1, seed=RANDOM_SEED)
-        nx.draw(G, pos=pos, with_labels=False, node_size=20, width=0.5)
-        plt.show()
 
     def getGraphStatistics(self):
         edge_frame = DataProcessor.loadEdges(self.dataset, self.threshold)

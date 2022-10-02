@@ -1,8 +1,9 @@
 class Node:
-    id: int
+    id: str
     degree: int
     relations: [int]
     value: dict
+    cluster_id: str
 
     def __str__(self):
         return f'Id: {self.id}\n' \
