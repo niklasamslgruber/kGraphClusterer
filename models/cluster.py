@@ -3,6 +3,7 @@ from models.graph import Graph
 
 
 class Cluster:
+    id: str
     nodes: [Node] = []
 
     def __init__(self, nodes: [Node]):
