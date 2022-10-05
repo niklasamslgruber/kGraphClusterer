@@ -177,11 +177,3 @@ class InformationLossEngine:
 
         return optimal_case
 
-    # def getNormalizedCertaintyPenalty:
-    #     return 4
-    #
-    #
-    # def getEntropy:
-    #     return 5
-
-    # def

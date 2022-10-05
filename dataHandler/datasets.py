@@ -42,8 +42,8 @@ class Datasets(Enum):
     def getGeneralizationTree(self, attribute: str):
         return f"{self.__getDirectory()}/trees/{attribute}_generalization_tree.json"
 
-    def getResultsPath(self, old: bool = False):
-        return f"{self.__getDirectory()}/{'results_random' if old else 'results'}.csv"
+    def getResultsPath(self):
+        return f"{self.__getDirectory()}/results.csv"
 
     def getImagePath(self):
         path = f"{self.__getDirectory()}/images"

@@ -44,7 +44,10 @@ class AnonymizationEngine:
                 if i in S.keys():
                     S[i].nodes.append(x_seed)
                 else:
-                    S[i] = Cluster(nodes=[x_seed])
+                    cluster = Cluster(nodes=[x_seed])
+                    cluster.id = i
+                    x_seed.cluster_id = cluster.id
+                    S[i] = cluster
 
                 self.graph_nodes.remove(x_seed)
 
@@ -74,7 +77,12 @@ class AnonymizationEngine:
                     del S[i]
                     self.__disperseCluster(S, value)
                 else:
-                    final_clusters.append(Cluster(S[i].nodes))
+                    cluster = Cluster(S[i].nodes)
+                    cluster.id = i
+
+                    for node in cluster.nodes:
+                        node.cluster_id = cluster.id
+                    final_clusters.append(cluster)
                     i += 1
                 pbar.update(old_length - len(self.graph_nodes))
 
@@ -88,6 +96,7 @@ class AnonymizationEngine:
             best_cluster = self.__findBestCluster(node, partition)[1]
             for key in partition_dict.keys():
                 if partition_dict[key] == best_cluster:
+                    node.cluster_id = key
                     partition_dict[key].nodes.append(node)
 
     def __findBestCluster(self, input_node, partition):
