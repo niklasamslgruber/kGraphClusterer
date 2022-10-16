@@ -36,6 +36,9 @@ class AnonymizationEngine:
         S: {int: Cluster} = {}
         final_clusters: [Cluster] = []
         i: int = 1
+
+        entropy_counter = 0
+
         with tqdm(total=len(self.graph_nodes)) as pbar:
             while len(self.graph_nodes) != 0:
                 old_length = len(self.graph_nodes)
@@ -68,6 +71,10 @@ class AnonymizationEngine:
                         case AnonymizationType.NORMALIZED_CERTAINTY_PENALTY:
                             engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
                             X_star, metric = engine.getNormalizedCertaintyPenalty(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case AnonymizationType.ENTROPY:
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric, counter = engine.getEntropy(copy.copy(self.graph_nodes), copy.copy(S[i]), entropy_counter)
+                            entropy_counter = counter
 
                     S[i].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)
