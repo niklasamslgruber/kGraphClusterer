@@ -65,7 +65,6 @@ class Runner:
             visualizationEngine.drawGraph(partition)
             visualizationEngine.drawInitialGraph()
 
-
         if shouldPrint:
             print("\n-----")
             print(f"Generated Clusters for dataset {dataset.name}:")

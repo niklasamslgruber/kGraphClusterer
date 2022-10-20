@@ -15,3 +15,10 @@ class Cluster:
 
     def getIds(self):
         return list(map(lambda node: node.id, self.nodes))
+
+    def getNumberOfEdges(self):
+        edge_count = 0
+        for node in self.nodes:
+            edge_count += len(node.relations)
+
+        return edge_count
