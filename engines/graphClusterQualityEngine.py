@@ -149,3 +149,28 @@ class GraphClusterQualityEngine:
                 optimal_case = (node, performance)
 
         return optimal_case
+
+    # Source: https://nlp.stanford.edu/IR-book/pdf/irbookonlinereading.pdf
+    def getPurity(self, graph_nodes: [Node], S_original: Cluster):
+        optimal_case: (Node, int) = (None, -math.inf)
+        majority = S_original.getMajority(self.dataset)
+
+        for node in graph_nodes.copy():
+            cluster = copy.deepcopy(S_original)
+
+            cluster.nodes.append(node)
+
+            majority_counter = 0
+            for cluster_node in cluster.nodes:
+                for identifier in self.dataset.getNumericalIdentifiers() + self.dataset.getCategoricalIdentifiers():
+                    if cluster_node.value[identifier] == majority[identifier]:
+                        majority_counter += 1
+
+            purity = self.alpha * (majority_counter / (len(cluster.nodes) * (
+                len(self.dataset.getNumericalIdentifiers() + self.dataset.getCategoricalIdentifiers()))))
+            purity -= self.beta * DistanceEngine(self.graph).getNodeClusterDistance(cluster, node)
+
+            if purity > optimal_case[1]:
+                optimal_case = (node, purity)
+
+        return optimal_case

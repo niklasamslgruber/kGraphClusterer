@@ -12,6 +12,7 @@ class AnonymizationType(Enum):
     MODULARITY = "Modularity"
     SILHOUETTE = "Silhouette"
     GRAPH_PERFORMANCE = "Graph_Performance"
+    PURITY = "Purity"
 
     @staticmethod
     def getCase(method: str):
@@ -34,5 +35,7 @@ class AnonymizationType(Enum):
                 return AnonymizationType.SILHOUETTE
             case AnonymizationType.GRAPH_PERFORMANCE.name:
                 return AnonymizationType.GRAPH_PERFORMANCE
+            case AnonymizationType.PURITY.name:
+                return AnonymizationType.PURITY
             case _:
                 return

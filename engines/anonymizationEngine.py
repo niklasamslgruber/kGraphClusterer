@@ -85,6 +85,9 @@ class AnonymizationEngine:
                         case AnonymizationType.GRAPH_PERFORMANCE:
                             engine = GraphClusterQualityEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
                             X_star, metric = engine.getGraphPerformance(copy.copy(self.graph_nodes), copy.copy(S), i)
+                        case AnonymizationType.PURITY:
+                            engine = GraphClusterQualityEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getPurity(copy.copy(self.graph_nodes), copy.copy(S[i]))
                         case _:
                             assert False, "No matching anonymization type found. Check your `--method` parameter"
 
