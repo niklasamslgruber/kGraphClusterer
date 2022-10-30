@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 import pandas as pd
 from constants import RANDOM_SEED
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets
 from dataHandler.graphGenerator import GraphGenerator
+from engines.anonymizationType import AnonymizationType
 from models.partition import Partition
 
 
@@ -20,18 +22,76 @@ class VisualizationEngine:
         fig, ax = self.__plotMetrics("ngil", "NGIL")
         fig.savefig(f'{self.dataset.getImagePath()}/ngil.png', dpi=200)
 
+        for size in [100, 300, 500, 1000]:
+            fig, ax = self.__plotMetricsSized(size, "ngil", "NGIL", excluded=[AnonymizationType.MODULARITY, AnonymizationType.SILHOUETTE, AnonymizationType.GRAPH_PERFORMANCE, AnonymizationType.PURITY])
+            fig.savefig(f'{self.dataset.getImagePath()}/ngil{size}_traditional.png', dpi=100)
+
     def plotNSIL(self):
         fig, ax = self.__plotMetrics("nsil", "NSIL")
         fig.savefig(f'{self.dataset.getImagePath()}/nsil.png', dpi=200)
+
+        for size in [100, 300, 500, 1000]:
+            fig, ax = self.__plotMetricsSized(size, "nsil", "NSIL", excluded=[AnonymizationType.MODULARITY, AnonymizationType.SILHOUETTE, AnonymizationType.GRAPH_PERFORMANCE, AnonymizationType.PURITY])
+            fig.savefig(f'{self.dataset.getImagePath()}/nsil{size}_traditional.png', dpi=200)
 
     def plotPerformance(self):
         fig, ax = self.__plotPerformance("time", "Time [s]")
         fig.savefig(f'{self.dataset.getImagePath()}/time.png', dpi=200)
 
+    def __plotMetricsSized(self, size: int, y: str, y_label: str, excluded: [AnonymizationType] = None):
+        frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
+
+        if excluded is not None:
+            for type in excluded:
+                frame = frame[frame["method"] != type.value]
+
+        fig, ax = plt.subplots(2, 2, figsize=(50, 50))
+
+        a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (1, 1)]
+        for key, grp in frame.groupby(["method"]):
+            col = 0
+            row = 0
+            for index, (alpha, beta) in enumerate(a_b_pairs):
+                small = grp[(grp["size"] == size) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
+
+                ax[col, row] = small.plot(ax=ax[col, row], kind='line', x='k', y=y, label=key, linewidth=5, legend=0 if index != 0 else 1)
+                ax[col, row].set_title(f"alpha = {alpha}, beta = {beta}", fontsize=22)
+
+                if index == 1:
+                    col += 1
+                    row = 0
+                else:
+                    row += 1
+
+        for axItem in ax.ravel():
+            axItem.legend(loc=2, prop={'size': 22})
+            axItem.set(xlabel='k', ylabel=y_label)
+            axItem.spines["left"].set_linewidth(5)
+            axItem.spines["bottom"].set_linewidth(5)
+            axItem.spines["right"].set_linewidth(5)
+            axItem.spines["top"].set_linewidth(5)
+            axItem.tick_params(axis='both', labelsize=22)
+            axItem.set_xlabel("k", fontsize=22)
+            axItem.set_ylabel(y_label, fontsize=22)
+
+            if y == "ngil":
+                axItem.set_ylim(0, 1)
+                axItem.set_yticks(np.arange(0, 1, 0.05))
+
+            if y == "nsil":
+                axItem.set_ylim(0, 0.15)
+                axItem.set_yticks(np.arange(0, 0.15, 0.05))
+
+        # handles, labels = ax.ravel()[0].get_legend_handles_labels()
+        # fig.legend(handles, labels, loc='upper left', prop={'size': 22})
+        plt.tight_layout()
+
+        return fig, ax
+
     def __plotMetrics(self, y: str, y_label: str):
         frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
 
-        fig, ax = plt.subplots(5, 3, figsize=(20, 40))
+        fig, ax = plt.subplots(5, 3, figsize=(40, 40))
 
         for key, grp in frame.groupby(["method"]):
             index = 0
@@ -58,11 +118,15 @@ class VisualizationEngine:
         for axItem in ax.ravel():
             axItem.legend(loc=2, prop={'size': 6})
             axItem.set(xlabel='k', ylabel=y_label)
+            # plt.yticks(np.arange(0, 1, 10))
+
             if y == "ngil":
                 axItem.set_ylim(0, 1)
+                axItem.set_yticks(np.arange(0, 1, 0.05))
 
             if y == "nsil":
                 axItem.set_ylim(0, 0.15)
+                axItem.set_yticks(np.arange(0, 0.15, 0.05))
 
         plt.tight_layout()
 
@@ -72,7 +136,7 @@ class VisualizationEngine:
         frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
         frame = frame[frame["size"] < 1000]
 
-        fig, ax = plt.subplots(2, 3, figsize=(20, 40))
+        fig, ax = plt.subplots(2, 3, figsize=(20, 40), sharey=True)
         frame = frame[frame["size"] < 1000]
 
         chosen_k = 4
@@ -105,7 +169,7 @@ class VisualizationEngine:
             axItem.legend(loc=2, prop={'size': 6})
             axItem.set(xlabel='Dataset Size', ylabel=y_label)
             axItem.xaxis.set_ticks([100, 300, 500])
-            axItem.set_ylim(0, 800)
+            # axItem.set_ylim(0, 800)
 
         plt.tight_layout()
 
