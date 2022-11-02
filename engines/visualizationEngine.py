@@ -26,6 +26,11 @@ class VisualizationEngine:
             fig, ax = self.__plotMetricsSized(size, "ngil", "NGIL", excluded=[AnonymizationType.MODULARITY, AnonymizationType.SILHOUETTE, AnonymizationType.GRAPH_PERFORMANCE, AnonymizationType.PURITY])
             fig.savefig(f'{self.dataset.getImagePath()}/ngil{size}_traditional.png', dpi=100)
 
+            fig, ax = self.__plotMetricsSized(size, "ngil", "NGIL",
+                                              excluded=[AnonymizationType.DISCERNIBILITY, AnonymizationType.PRECISION,
+                                                        AnonymizationType.CLASSIFICATION_METRIC, AnonymizationType.NORMALIZED_CERTAINTY_PENALTY, AnonymizationType.ENTROPY])
+            fig.savefig(f'{self.dataset.getImagePath()}/ngil{size}_graph_clusters.png', dpi=100)
+
     def plotNSIL(self):
         fig, ax = self.__plotMetrics("nsil", "NSIL")
         fig.savefig(f'{self.dataset.getImagePath()}/nsil.png', dpi=200)
@@ -34,9 +39,23 @@ class VisualizationEngine:
             fig, ax = self.__plotMetricsSized(size, "nsil", "NSIL", excluded=[AnonymizationType.MODULARITY, AnonymizationType.SILHOUETTE, AnonymizationType.GRAPH_PERFORMANCE, AnonymizationType.PURITY])
             fig.savefig(f'{self.dataset.getImagePath()}/nsil{size}_traditional.png', dpi=200)
 
+            fig, ax = self.__plotMetricsSized(size, "nsil", "NSIL",
+                                              excluded=[AnonymizationType.DISCERNIBILITY, AnonymizationType.PRECISION,
+                                                        AnonymizationType.CLASSIFICATION_METRIC,
+                                                        AnonymizationType.NORMALIZED_CERTAINTY_PENALTY,
+                                                        AnonymizationType.ENTROPY])
+            fig.savefig(f'{self.dataset.getImagePath()}/nsil{size}_graph_clusters.png', dpi=100)
+
     def plotPerformance(self):
-        fig, ax = self.__plotPerformance("time", "Time [s]")
-        fig.savefig(f'{self.dataset.getImagePath()}/time.png', dpi=200)
+        fig, ax = self.__plotPerformance("time", "Time [s]", excluded=[AnonymizationType.MODULARITY, AnonymizationType.SILHOUETTE, AnonymizationType.GRAPH_PERFORMANCE, AnonymizationType.PURITY])
+        fig.savefig(f'{self.dataset.getImagePath()}/time_traditional.png', dpi=200)
+
+        fig, ax = self.__plotPerformance("time", "Time [s]",
+                                         excluded=[AnonymizationType.DISCERNIBILITY, AnonymizationType.PRECISION,
+                                                        AnonymizationType.CLASSIFICATION_METRIC,
+                                                        AnonymizationType.NORMALIZED_CERTAINTY_PENALTY,
+                                                        AnonymizationType.ENTROPY])
+        fig.savefig(f'{self.dataset.getImagePath()}/time_graph_clusters.png', dpi=200)
 
     def __plotMetricsSized(self, size: int, y: str, y_label: str, excluded: [AnonymizationType] = None):
         frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
@@ -47,13 +66,20 @@ class VisualizationEngine:
 
         fig, ax = plt.subplots(2, 2, figsize=(50, 50))
 
-        a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (1, 1)]
+        if size == 1000:
+            a_b_pairs = [(1, 0.5), (1, 1)]
+        else:
+            a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (1, 1)]
+
         for key, grp in frame.groupby(["method"]):
             col = 0
             row = 0
-            for index, (alpha, beta) in enumerate(a_b_pairs):
-                small = grp[(grp["size"] == size) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
 
+            if key == AnonymizationType.NORMALIZED_CERTAINTY_PENALTY.value:
+                key = "NPC"
+
+            for index, (alpha, beta) in enumerate(a_b_pairs):
+                small = grp[(grp["size"] == size) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
                 ax[col, row] = small.plot(ax=ax[col, row], kind='line', x='k', y=y, label=key, linewidth=5, legend=0 if index != 0 else 1)
                 ax[col, row].set_title(f"alpha = {alpha}, beta = {beta}", fontsize=22)
 
@@ -78,12 +104,6 @@ class VisualizationEngine:
                 axItem.set_ylim(0, 1)
                 axItem.set_yticks(np.arange(0, 1, 0.05))
 
-            if y == "nsil":
-                axItem.set_ylim(0, 0.15)
-                axItem.set_yticks(np.arange(0, 0.15, 0.05))
-
-        # handles, labels = ax.ravel()[0].get_legend_handles_labels()
-        # fig.legend(handles, labels, loc='upper left', prop={'size': 22})
         plt.tight_layout()
 
         return fig, ax
@@ -97,9 +117,12 @@ class VisualizationEngine:
             index = 0
             a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (0.5, 0.5), (1, 1)]
             for (alpha, beta) in a_b_pairs:
-                small = grp[(grp["size"] == 100) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
-                medium = grp[(grp["size"] == 300) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
-                big = grp[(grp["size"] == 500) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
+                small = grp[(grp["size"] == 100) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
+                medium = grp[(grp["size"] == 300) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
+                big = grp[(grp["size"] == 500) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
+
+                if key == AnonymizationType.NORMALIZED_CERTAINTY_PENALTY.value:
+                    key = "NPC"
 
                 if len(small) > 0:
                     ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='k', y=y, label=key)
@@ -132,12 +155,16 @@ class VisualizationEngine:
 
         return fig, ax
 
-    def __plotPerformance(self, y: str, y_label: str):
+    def __plotPerformance(self, y: str, y_label: str, excluded: [AnonymizationType] = None):
         frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
-        frame = frame[frame["size"] < 1000]
+        # frame = frame[frame["size"] < 1000]
 
         fig, ax = plt.subplots(2, 3, figsize=(20, 40), sharey=True)
-        frame = frame[frame["size"] < 1000]
+        # frame = frame[frame["size"] < 1000]
+
+        if excluded is not None:
+            for type in excluded:
+                frame = frame[frame["method"] != type.value]
 
         chosen_k = 4
         chosen_k2 = 6
@@ -145,31 +172,40 @@ class VisualizationEngine:
 
         for key, grp in frame.groupby(["method"]):
             index = 0
-            a_b_pairs = [(1, 0), (0.5, 0.5)]
+            a_b_pairs = [(1, 0.5), (1, 1)]
             for (alpha, beta) in a_b_pairs:
-                small = grp[(grp["k"] == chosen_k) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
-                medium = grp[(grp["k"] == chosen_k2) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
-                big = grp[(grp["k"] == chosen_k3) & (grp["alpha"] == alpha) & (grp["beta"] == beta)]
+                small = grp[(grp["k"] == chosen_k) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
+                medium = grp[(grp["k"] == chosen_k2) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
+                big = grp[(grp["k"] == chosen_k3) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
+
+                if key == AnonymizationType.NORMALIZED_CERTAINTY_PENALTY.value:
+                    key = "NPC"
 
                 if len(small) > 0:
-                    ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='size', y="time", label=key)
-                    ax[index, 0].set_title(f"k = {chosen_k}, alpha = {alpha}, beta = {beta}")
+                    ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='size', y="time", label=key, linewidth=5)
+                    ax[index, 0].set_title(f"k = {chosen_k}, alpha = {alpha}, beta = {beta}", fontsize=22)
 
                 if len(medium) > 0:
-                    ax[index, 1] = medium.plot(ax=ax[index, 1], kind='line', x='size', y="time", label=key)
-                    ax[index, 1].set_title(f"k = {chosen_k2}, alpha = {alpha}, beta = {beta}")
+                    ax[index, 1] = medium.plot(ax=ax[index, 1], kind='line', x='size', y="time", label=key, linewidth=5)
+                    ax[index, 1].set_title(f"k = {chosen_k2}, alpha = {alpha}, beta = {beta}", fontsize=22)
 
                 if len(big) > 0:
-                    ax[index, 2] = big.plot(ax=ax[index, 2], kind='line', x='size', y="time", label=key)
-                    ax[index, 2].set_title(f"k = {chosen_k3}, alpha = {alpha}, beta = {beta}")
+                    ax[index, 2] = big.plot(ax=ax[index, 2], kind='line', x='size', y="time", label=key, linewidth=5)
+                    ax[index, 2].set_title(f"k = {chosen_k3}, alpha = {alpha}, beta = {beta}", fontsize=22)
 
                 index += 1
 
         for axItem in ax.ravel():
-            axItem.legend(loc=2, prop={'size': 6})
+            axItem.legend(loc=2, prop={'size': 22})
             axItem.set(xlabel='Dataset Size', ylabel=y_label)
-            axItem.xaxis.set_ticks([100, 300, 500])
-            # axItem.set_ylim(0, 800)
+            axItem.xaxis.set_ticks([100, 300, 500, 1000])
+            axItem.spines["left"].set_linewidth(5)
+            axItem.spines["bottom"].set_linewidth(5)
+            axItem.spines["right"].set_linewidth(5)
+            axItem.spines["top"].set_linewidth(5)
+            axItem.tick_params(axis='both', labelsize=22)
+            axItem.set_xlabel("k", fontsize=22)
+            axItem.set_ylabel(y_label, fontsize=22)
 
         plt.tight_layout()
 
