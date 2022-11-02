@@ -19,7 +19,6 @@ import time
 from models.partition import Partition
 
 
-
 class Runner:
     type: AnonymizationType
     threshold: int
@@ -95,10 +94,10 @@ class Runner:
         assert numberOfNodes == threshold, f"Number of nodes ({numberOfNodes}) is not equal to dataset size ({threshold})"
 
     def runMultiple(self):
-        a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (0.5, 0.5), (1, 1)]
+        a_b_pairs = [(1, 0), (0.5, 1)]
         for k in [2, 4, 6, 8, 10]:
             for (alpha, beta) in a_b_pairs:
-                for limit in [100, 300, 500]:
+                for limit in [1000]:
                     self.run(self.dataset, alpha, beta, k, self.type, limit)
 
     def runMetrics(self):
@@ -111,3 +110,5 @@ class Runner:
 
     def visualizeResults(self):
         ResultCollector(self.dataset).visualizeResults(self.type)
+
+
