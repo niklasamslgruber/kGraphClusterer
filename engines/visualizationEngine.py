@@ -66,10 +66,7 @@ class VisualizationEngine:
 
         fig, ax = plt.subplots(2, 2, figsize=(50, 50))
 
-        if size == 1000:
-            a_b_pairs = [(1, 0.5), (1, 1)]
-        else:
-            a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (1, 1)]
+        a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (1, 1)]
 
         for key, grp in frame.groupby(["method"]):
             col = 0
@@ -157,10 +154,8 @@ class VisualizationEngine:
 
     def __plotPerformance(self, y: str, y_label: str, excluded: [AnonymizationType] = None):
         frame = pd.read_csv(self.dataset.getResultsPath(), header=0)
-        # frame = frame[frame["size"] < 1000]
 
         fig, ax = plt.subplots(2, 3, figsize=(20, 40), sharey=True)
-        # frame = frame[frame["size"] < 1000]
 
         if excluded is not None:
             for type in excluded:
