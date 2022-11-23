@@ -14,6 +14,9 @@ class VisualizationEngine:
     dataset: Datasets
     threshold: int
 
+    FONTSIZE = 30
+    LINE_WIDTH = 7
+
     def __init__(self, dataset: Datasets, threshold: int):
         self.dataset = dataset
         self.threshold = threshold
@@ -77,8 +80,8 @@ class VisualizationEngine:
 
             for index, (alpha, beta) in enumerate(a_b_pairs):
                 small = grp[(grp["size"] == size) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
-                ax[col, row] = small.plot(ax=ax[col, row], kind='line', x='k', y=y, label=key, linewidth=5, legend=0 if index != 0 else 1)
-                ax[col, row].set_title(f"alpha = {alpha}, beta = {beta}", fontsize=22)
+                ax[col, row] = small.plot(ax=ax[col, row], kind='line', x='k', y=y, label=key, linewidth=self.LINE_WIDTH, legend=0 if index != 0 else 1)
+                ax[col, row].set_title(f"alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 if index == 1:
                     col += 1
@@ -87,15 +90,15 @@ class VisualizationEngine:
                     row += 1
 
         for axItem in ax.ravel():
-            axItem.legend(loc=2, prop={'size': 22})
+            axItem.legend(loc=2, prop={'size': self.FONTSIZE})
             axItem.set(xlabel='k', ylabel=y_label)
-            axItem.spines["left"].set_linewidth(5)
-            axItem.spines["bottom"].set_linewidth(5)
-            axItem.spines["right"].set_linewidth(5)
-            axItem.spines["top"].set_linewidth(5)
-            axItem.tick_params(axis='both', labelsize=22)
-            axItem.set_xlabel("k", fontsize=22)
-            axItem.set_ylabel(y_label, fontsize=22)
+            axItem.spines["left"].set_linewidth(self.LINE_WIDTH)
+            axItem.spines["bottom"].set_linewidth(self.LINE_WIDTH)
+            axItem.spines["right"].set_linewidth(self.LINE_WIDTH)
+            axItem.spines["top"].set_linewidth(self.LINE_WIDTH)
+            axItem.tick_params(axis='both', labelsize=self.FONTSIZE)
+            axItem.set_xlabel("k", fontsize=self.FONTSIZE)
+            axItem.set_ylabel(y_label, fontsize=self.FONTSIZE)
 
             if y == "ngil":
                 axItem.set_ylim(0, 1)
@@ -138,7 +141,6 @@ class VisualizationEngine:
         for axItem in ax.ravel():
             axItem.legend(loc=2, prop={'size': 6})
             axItem.set(xlabel='k', ylabel=y_label)
-            # plt.yticks(np.arange(0, 1, 10))
 
             if y == "ngil":
                 axItem.set_ylim(0, 1)
@@ -177,30 +179,30 @@ class VisualizationEngine:
                     key = "NPC"
 
                 if len(small) > 0:
-                    ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='size', y="time", label=key, linewidth=5)
-                    ax[index, 0].set_title(f"k = {chosen_k}, alpha = {alpha}, beta = {beta}", fontsize=22)
+                    ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH)
+                    ax[index, 0].set_title(f"k = {chosen_k}, alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 if len(medium) > 0:
-                    ax[index, 1] = medium.plot(ax=ax[index, 1], kind='line', x='size', y="time", label=key, linewidth=5)
-                    ax[index, 1].set_title(f"k = {chosen_k2}, alpha = {alpha}, beta = {beta}", fontsize=22)
+                    ax[index, 1] = medium.plot(ax=ax[index, 1], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH)
+                    ax[index, 1].set_title(f"k = {chosen_k2}, alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 if len(big) > 0:
-                    ax[index, 2] = big.plot(ax=ax[index, 2], kind='line', x='size', y="time", label=key, linewidth=5)
-                    ax[index, 2].set_title(f"k = {chosen_k3}, alpha = {alpha}, beta = {beta}", fontsize=22)
+                    ax[index, 2] = big.plot(ax=ax[index, 2], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH)
+                    ax[index, 2].set_title(f"k = {chosen_k3}, alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 index += 1
 
         for axItem in ax.ravel():
-            axItem.legend(loc=2, prop={'size': 22})
+            axItem.legend(loc=2, prop={'size': self.FONTSIZE})
             axItem.set(xlabel='Dataset Size', ylabel=y_label)
             axItem.xaxis.set_ticks([100, 300, 500, 1000])
-            axItem.spines["left"].set_linewidth(5)
-            axItem.spines["bottom"].set_linewidth(5)
-            axItem.spines["right"].set_linewidth(5)
-            axItem.spines["top"].set_linewidth(5)
-            axItem.tick_params(axis='both', labelsize=22)
-            axItem.set_xlabel("k", fontsize=22)
-            axItem.set_ylabel(y_label, fontsize=22)
+            axItem.spines["left"].set_linewidth(self.LINE_WIDTH)
+            axItem.spines["bottom"].set_linewidth(self.LINE_WIDTH)
+            axItem.spines["right"].set_linewidth(self.LINE_WIDTH)
+            axItem.spines["top"].set_linewidth(self.LINE_WIDTH)
+            axItem.tick_params(axis='both', labelsize=self.FONTSIZE)
+            axItem.set_xlabel("k", fontsize=self.FONTSIZE)
+            axItem.set_ylabel(y_label, fontsize=self.FONTSIZE)
 
         plt.tight_layout()
 
