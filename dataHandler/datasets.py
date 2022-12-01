@@ -1,3 +1,4 @@
+from datetime import datetime
 from os.path import exists
 from os import mkdir
 from enum import Enum, unique
@@ -47,6 +48,16 @@ class Datasets(Enum):
 
     def getImagePath(self):
         path = f"{self.__getDirectory()}/images"
+        if not exists(path):
+            mkdir(path)
+        return path
+
+    def getOutputPath(self):
+        now = datetime.now().strftime("%d-%m-%Y_%H:%M")
+        base_path = f"{self.__getDirectory()}/output"
+        if not exists(base_path):
+            mkdir(base_path)
+        path = f"{base_path}/{now}/"
         if not exists(path):
             mkdir(path)
         return path

@@ -49,6 +49,14 @@ class VisualizationEngine:
                                                         AnonymizationType.ENTROPY])
             fig.savefig(f'{self.dataset.getImagePath()}/nsil{size}_graph_clusters.png', dpi=100)
 
+    def plotCGIL(self):
+        fig, ax = self.__plotMetrics("cgil", "CGIL")
+        fig.savefig(f'{self.dataset.getImagePath()}/cgil.png', dpi=200)
+
+        for size in [100, 300, 500, 1000]:
+            fig, ax = self.__plotMetricsSized(size, "cgil", "CGIL", excluded=[])
+            fig.savefig(f'{self.dataset.getImagePath()}/cgil{size}.png', dpi=200)
+
     def plotPerformance(self):
         fig, ax = self.__plotPerformance("time", "Time [s]", excluded=[AnonymizationType.MODULARITY, AnonymizationType.SILHOUETTE, AnonymizationType.GRAPH_PERFORMANCE, AnonymizationType.PURITY])
         fig.savefig(f'{self.dataset.getImagePath()}/time_traditional.png', dpi=200)
@@ -67,7 +75,7 @@ class VisualizationEngine:
             for type in excluded:
                 frame = frame[frame["method"] != type.value]
 
-        fig, ax = plt.subplots(2, 2, figsize=(50, 50))
+        fig, ax = plt.subplots(2, 2, figsize=(50, 50), sharey=True)
 
         a_b_pairs = [(1, 0), (1, 0.5), (0.5, 1), (1, 1)]
 

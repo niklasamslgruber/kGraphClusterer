@@ -1,7 +1,6 @@
 import pandas as pd
 import random
 import networkx as nx
-from matplotlib import pyplot as plt
 from tqdm import tqdm
 from dataHandler.dataProcessor import DataProcessor
 from dataHandler.datasets import Datasets

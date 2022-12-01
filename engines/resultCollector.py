@@ -20,8 +20,9 @@ class ResultCollector:
         time: float
         method: str
         seed: int
+        cgil: float
 
-        def __init__(self, k: int, alpha: float, beta: float, size: int, edge_num: int, ngil: float, nsil: float, num_of_clusters: int, time: float, method: str):
+        def __init__(self, k: int, alpha: float, beta: float, size: int, edge_num: int, ngil: float, nsil: float, num_of_clusters: int, time: float, method: str, cgil: float):
             self.k = k
             self.alpha = alpha
             self.beta = beta
@@ -33,6 +34,7 @@ class ResultCollector:
             self.time = time
             self.method = method
             self.seed = RANDOM_SEED
+            self.cgil = cgil
 
         def to_dict(self):
             return {
@@ -46,7 +48,8 @@ class ResultCollector:
                 "num_of_clusters": self.num_of_clusters,
                 "time": self.time,
                 "method": self.method,
-                "seed": self.seed
+                "seed": self.seed,
+                "cgil": self.cgil
             }
 
     dataset: Datasets
@@ -75,9 +78,3 @@ class ResultCollector:
 
         existingResults.columns = newData.keys()
         existingResults.to_csv(self.dataset.getResultsPath(), index=False)
-
-    def visualizeResults(self, method: AnonymizationType):
-        visualizer = VisualizationEngine(self.dataset, method, 0)
-        visualizer.plotNGIL()
-        visualizer.plotNSIL()
-        visualizer.plotPerformance()
