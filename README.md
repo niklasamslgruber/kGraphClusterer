@@ -44,6 +44,13 @@ $ python main.py
 	$ python runMultiple.py
 	```
 	
+##### Output
+The anonymized graph will be stored in the `/output/<experiment_time>` directory of your dataset. It included four files that can be important to any graph database.
+These files are:
+* `associations.csv`: Includes all node IDs and the cluster ID they belong to
+* `edges.csv`: Edges between the clusters
+* `features.csv`: The anonymized node labels
+* `results.json`: All experiment parameters
 
 ## Dependencies
 The project requires Python `3.10` and the following packages need to be installed:
@@ -88,7 +95,7 @@ To use your own dataset create a new directory in `data/` with the name of the d
 	    ],
 	    "410**": [
 	      "41076",
-	      "41088",
+	      "41088"
 	    ]
 	  }
 	}
