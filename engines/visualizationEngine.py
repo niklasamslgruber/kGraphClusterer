@@ -88,8 +88,8 @@ class VisualizationEngine:
 
             for index, (alpha, beta) in enumerate(a_b_pairs):
                 small = grp[(grp["size"] == size) & (grp["alpha"] == alpha) & (grp["beta"] == beta)].sort_values(by=['k'])
-                ax[col, row] = small.plot(ax=ax[col, row], kind='line', x='k', y=y, label=key, linewidth=self.LINE_WIDTH, legend=0 if index != 0 else 1)
-                ax[col, row].set_title(f"alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
+                ax[col, row] = small.plot(ax=ax[col, row], kind='line', x='k', y=y, label=key, linewidth=self.LINE_WIDTH, legend=0 if index != 0 else 1, linestyle = "dotted" if key == AnonymizationType.SaNGreeA.value else "solid")
+                ax[col, row].set_title(f"alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE * 1.5)
 
                 if index == 1:
                     col += 1
@@ -187,15 +187,15 @@ class VisualizationEngine:
                     key = "NPC"
 
                 if len(small) > 0:
-                    ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH)
+                    ax[index, 0] = small.plot(ax=ax[index, 0], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH, linestyle = "dotted" if key == AnonymizationType.SaNGreeA.value else "solid")
                     ax[index, 0].set_title(f"k = {chosen_k}, alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 if len(medium) > 0:
-                    ax[index, 1] = medium.plot(ax=ax[index, 1], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH)
+                    ax[index, 1] = medium.plot(ax=ax[index, 1], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH, linestyle = "dotted" if key == AnonymizationType.SaNGreeA.value else "solid")
                     ax[index, 1].set_title(f"k = {chosen_k2}, alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 if len(big) > 0:
-                    ax[index, 2] = big.plot(ax=ax[index, 2], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH)
+                    ax[index, 2] = big.plot(ax=ax[index, 2], kind='line', x='size', y="time", label=key, linewidth=self.LINE_WIDTH, linestyle = "dotted" if key == AnonymizationType.SaNGreeA.value else "solid")
                     ax[index, 2].set_title(f"k = {chosen_k3}, alpha = {alpha}, beta = {beta}", fontsize=self.FONTSIZE)
 
                 index += 1
