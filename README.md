@@ -26,7 +26,7 @@ $ python main.py
 * `-a, --alpha`_(float)_: Weight  factor of generalization information loss
 * `-b, --beta`_(float)_: Weight factor of structural information loss
 * `-n, --size`_(int)_: Dataset subset size
-* `-m, --method`_(str)_: Method for calculating information loss (_see above for options. Case sensitive_)
+* `-m, --method`_(str)_: Method for calculating information loss (_see above for options. Case-sensitive_)
 * `--plot`: Plot all algorithm results
 * `--generate_edges`_(int)_: Generate X edges based on the BTC transaction dataset
 * `--dataset`_(str)_: Select dataset
