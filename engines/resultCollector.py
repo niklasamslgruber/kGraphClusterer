@@ -1,10 +1,7 @@
 import pandas as pd
 from os.path import exists
-
 from constants import RANDOM_SEED
 from dataHandler.datasets import Datasets
-from engines.anonymizationType import AnonymizationType
-from engines.visualizationEngine import VisualizationEngine
 
 
 class ResultCollector:
