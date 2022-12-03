@@ -1,9 +1,6 @@
 import itertools
 import json
-
-import networkx as nx
 import pandas as pd
-from matplotlib import pyplot as plt
 from config import FLAGS
 from constants import RANDOM_SEED
 from dataHandler.graphGenerator import GraphGenerator
@@ -38,10 +35,6 @@ class Runner:
             self.generateEdges()
         else:
             Runner.run(self.dataset, FLAGS.alpha, FLAGS.beta, FLAGS.k, self.type, FLAGS.size)
-
-        if FLAGS.plot:
-            print("Plotting results...")
-            self.visualizeResults()
 
     @staticmethod
     def run(dataset: Datasets, alpha: float, beta: float, k: int, type: AnonymizationType, threshold: int,
@@ -85,13 +78,10 @@ class Runner:
             print("\tNGIL:", ngil)
             print("Execution time", exec_time, "s")
 
-
-
     @staticmethod
     def storeOutput(graph: Graph, partition: Partition, dataset: Datasets, threshold, result):
         associations = set([])
         edges = set([])
-        features = set([])
 
         raw_features = pd.read_csv(dataset.getFeaturePath(), index_col="id").sample(threshold, random_state=RANDOM_SEED)
         matched_features = pd.read_csv(dataset.getAssociationPath(threshold))
@@ -131,8 +121,6 @@ class Runner:
         with open(f"{dataset.getOutputPath()}/results.json", 'w') as file:
             json.dump(result.to_dict(), file, sort_keys=True, indent=4)
 
-
-
     @staticmethod
     def __verifyGraph(partition: Partition, k: int, threshold: int):
         numberOfNodes = 0
@@ -161,8 +149,3 @@ class Runner:
     def generateEdges(self):
         generator = GraphGenerator(dataset=self.dataset, threshold=self.threshold)
         generator.generateEdges()
-
-    def visualizeResults(self):
-        ResultCollector(self.dataset).visualizeResults(self.type)
-
-
