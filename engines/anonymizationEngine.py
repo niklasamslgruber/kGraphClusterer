@@ -4,6 +4,7 @@ from dataHandler.datasets import Datasets
 from engines.anonymizationType import AnonymizationType
 from engines.distanceEngine import DistanceEngine
 from engines.gilEngine import GILEngine
+from engines.graphClusterQualityEngine import GraphClusterQualityEngine
 from engines.informationLossEngine import InformationLossEngine
 from models.cluster import Cluster
 from models.graph import Graph
@@ -36,6 +37,9 @@ class AnonymizationEngine:
         S: {int: Cluster} = {}
         final_clusters: [Cluster] = []
         i: int = 1
+
+        entropy_counter = 0
+
         with tqdm(total=len(self.graph_nodes)) as pbar:
             while len(self.graph_nodes) != 0:
                 old_length = len(self.graph_nodes)
@@ -68,6 +72,24 @@ class AnonymizationEngine:
                         case AnonymizationType.NORMALIZED_CERTAINTY_PENALTY:
                             engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
                             X_star, metric = engine.getNormalizedCertaintyPenalty(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case AnonymizationType.ENTROPY:
+                            engine = InformationLossEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric, counter = engine.getEntropy(copy.copy(self.graph_nodes), copy.copy(S[i]), entropy_counter)
+                            entropy_counter = counter
+                        case AnonymizationType.MODULARITY:
+                            engine = GraphClusterQualityEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getModularity(copy.copy(self.graph_nodes), copy.copy(S), i)
+                        case AnonymizationType.SILHOUETTE:
+                            engine = GraphClusterQualityEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getSilhouette(copy.copy(self.graph_nodes), copy.copy(S), i)
+                        case AnonymizationType.GRAPH_PERFORMANCE:
+                            engine = GraphClusterQualityEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getGraphPerformance(copy.copy(self.graph_nodes), copy.copy(S), i)
+                        case AnonymizationType.PURITY:
+                            engine = GraphClusterQualityEngine(self.alpha, self.beta, self.k, self.dataset, self.graph)
+                            X_star, metric = engine.getPurity(copy.copy(self.graph_nodes), copy.copy(S[i]))
+                        case _:
+                            assert False, "No matching anonymization type found. Check your `--method` parameter"
 
                     S[i].nodes.append(X_star)
                     self.graph_nodes.remove(X_star)

@@ -8,6 +8,11 @@ class AnonymizationType(Enum):
     PRECISION = "Precision"
     CLASSIFICATION_METRIC = "Classification_Metric"
     NORMALIZED_CERTAINTY_PENALTY = "Normalized_Certainty_Penalty"
+    ENTROPY = "Entropy"
+    MODULARITY = "Modularity"
+    SILHOUETTE = "Silhouette"
+    GRAPH_PERFORMANCE = "Graph_Performance"
+    PURITY = "Purity"
 
     @staticmethod
     def getCase(method: str):
@@ -22,5 +27,15 @@ class AnonymizationType(Enum):
                 return AnonymizationType.CLASSIFICATION_METRIC
             case AnonymizationType.NORMALIZED_CERTAINTY_PENALTY.name:
                 return AnonymizationType.NORMALIZED_CERTAINTY_PENALTY
+            case AnonymizationType.ENTROPY.name:
+                return AnonymizationType.ENTROPY
+            case AnonymizationType.MODULARITY.name:
+                return AnonymizationType.MODULARITY
+            case AnonymizationType.SILHOUETTE.name:
+                return AnonymizationType.SILHOUETTE
+            case AnonymizationType.GRAPH_PERFORMANCE.name:
+                return AnonymizationType.GRAPH_PERFORMANCE
+            case AnonymizationType.PURITY.name:
+                return AnonymizationType.PURITY
             case _:
                 return

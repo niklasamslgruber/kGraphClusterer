@@ -1,3 +1,6 @@
+from dataHandler.datasets import Datasets
+
+
 class Node:
     id: str
     degree: int
@@ -10,3 +13,10 @@ class Node:
                f'Degree: {self.degree}\n' \
                f'Relations: {list(map(lambda x: str(x), self.relations))}\n' \
                f'Value: {self.value}'
+
+    def isEqual(self, dataset: Datasets, node):
+        for identifier in dataset.getNumericalIdentifiers() + dataset.getCategoricalIdentifiers():
+            if self.value[identifier] != node.value[identifier]:
+                return False
+
+        return True

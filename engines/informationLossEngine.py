@@ -1,5 +1,7 @@
 import json
 import math
+import random
+from constants import RANDOM_SEED
 from dataHandler.datasets import Datasets
 from engines.distanceEngine import DistanceEngine
 from engines.gilEngine import GILEngine
@@ -7,7 +9,6 @@ from models.cluster import Cluster
 from models.graph import Graph
 from models.node import Node
 import copy
-
 from models.partition import Partition
 
 
@@ -177,3 +178,37 @@ class InformationLossEngine:
 
         return optimal_case
 
+    def getEntropy(self, graph_nodes: [Node], S_original: Cluster, counter: int) -> (Node, int, int):
+        optimal_case: (Node, int) = (None, math.inf)
+
+        for node in graph_nodes.copy():
+            S = copy.deepcopy(S_original)
+            S.nodes.append(node)
+
+            cluster = Cluster(S.nodes)
+            entropy = 0
+
+            for attribute in self.dataset.getCategoricalIdentifiers() + self.dataset.getNumericalIdentifiers():
+                for _ in cluster.nodes:
+                    random_node = random.Random(RANDOM_SEED + counter).choice(cluster.nodes)
+                    value = random_node.value[attribute]
+
+                    nodes_with_same_label = len(list(filter(lambda x: x.value[attribute] == value, cluster.nodes)))
+                    number_of_nodes_in_cluster = len(cluster.nodes)
+
+                    pr = nodes_with_same_label / number_of_nodes_in_cluster
+
+                    if pr != 0:
+                        node_entropy = -(pr * math.log(pr, 2))
+                    else:
+                        node_entropy = 9999999
+
+                    entropy += node_entropy
+                    counter += 1
+
+            entropy = self.alpha * entropy
+            entropy += self.beta * DistanceEngine(self.graph).getNodeClusterDistance(cluster, node)
+            if entropy < optimal_case[1]:
+                optimal_case = (node, entropy)
+
+        return optimal_case[0], optimal_case[1], counter
