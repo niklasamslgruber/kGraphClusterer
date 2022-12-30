@@ -98,10 +98,10 @@ def createMinimumTable(ngil: bool):
 
 
 def visualize():
-    VisualizationEngine(Datasets.BANK_CLIENTS, 100).plotPerformance()
-    VisualizationEngine(Datasets.BANK_CLIENTS, 100).plotNGIL()
-    VisualizationEngine(Datasets.BANK_CLIENTS, 100).plotNSIL()
-    VisualizationEngine(Datasets.BANK_CLIENTS, 100).plotCGIL()
+    VisualizationEngine(Datasets.ADULTS, 100).plotPerformance()
+    VisualizationEngine(Datasets.ADULTS, 100).plotNGIL()
+    VisualizationEngine(Datasets.ADULTS, 100).plotNSIL()
+    VisualizationEngine(Datasets.ADULTS, 100).plotCGIL()
 
 
 if __name__ == '__main__':

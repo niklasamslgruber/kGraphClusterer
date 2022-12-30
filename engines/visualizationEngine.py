@@ -98,7 +98,7 @@ class VisualizationEngine:
                     row += 1
 
         for axItem in ax.ravel():
-            axItem.legend(loc=2, prop={'size': self.FONTSIZE})
+            axItem.legend(loc=2, prop={'size': self.FONTSIZE + 10})
             axItem.set(xlabel='k', ylabel=y_label)
             axItem.spines["left"].set_linewidth(self.LINE_WIDTH)
             axItem.spines["bottom"].set_linewidth(self.LINE_WIDTH)
@@ -201,7 +201,7 @@ class VisualizationEngine:
                 index += 1
 
         for axItem in ax.ravel():
-            axItem.legend(loc=2, prop={'size': self.FONTSIZE})
+            axItem.legend(loc=2, prop={'size': self.FONTSIZE + 10})
             axItem.set(xlabel='Dataset Size', ylabel=y_label)
             axItem.xaxis.set_ticks([100, 300, 500, 1000])
             axItem.spines["left"].set_linewidth(self.LINE_WIDTH)
