@@ -14,6 +14,11 @@ The currently supported metrics are:
 * `PRECISION`
 * `CLASSIFICATION_METRIC`
 * `NORMALIZED_CERTAINTY_PENALTY`
+* `ENTROPY`
+* `MODULARITY`
+* `SILHOUETTE INDEX`
+* `GRAPH_PERFORMANCE`
+* `PURITY`
 
 ## Running
 ```
